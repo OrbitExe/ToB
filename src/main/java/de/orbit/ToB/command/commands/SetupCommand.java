@@ -1,6 +1,7 @@
 package de.orbit.ToB.command.commands;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
@@ -9,6 +10,7 @@ import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
 import de.orbit.ToB.command.Command;
 import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -18,15 +20,20 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.util.blockray.BlockRayHit;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class SetupCommand implements Command {
 
@@ -45,7 +52,6 @@ public class SetupCommand implements Command {
                 .executor(this)
                 .arguments(
                     GenericArguments.seq(
-                        GenericArguments.integer(Text.of("id")),
                         GenericArguments.choices(Text.of("action"), new HashMap<String, String>() {{
                             this.put("create", "create");
                             this.put("sign", "sign");
@@ -53,6 +59,9 @@ public class SetupCommand implements Command {
                             this.put("plate", "plate");
                             this.put("spawn", "spawn");
                         }}, true),
+                        GenericArguments.optional(
+                            GenericArguments.integer(Text.of("id"))
+                        ),
                         GenericArguments.optional(
                             GenericArguments.string(Text.of("value"))
                         )
@@ -64,14 +73,14 @@ public class SetupCommand implements Command {
     @Override
     public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
 
-        int id = commandContext.<Integer>getOne("id").get();
+        Optional<Integer> id = commandContext.getOne("id");
         String action = commandContext.<String>getOne("action").get();
         Optional<String> value = commandContext.getOne("value");
 
         ArenaManager arenaManager = ToB.get(ArenaManager.class);
         MessageHandler messageHandler = ToB.get(MessageHandler.class);
 
-        Optional<Arena> arenaOptional = arenaManager.get(id);
+        Optional<Arena> arenaOptional = id.isPresent() ? arenaManager.get(id.get()) : Optional.empty();
 
         Player player = (Player) commandSource;
 
@@ -90,17 +99,9 @@ public class SetupCommand implements Command {
                     return CommandResult.success();
                 }
 
-                if(!(value.isPresent())) {
-                    messageHandler.send(
-                        player,
-                        MessageHandler.Level.ERROR,
-                        "Please provide the max amount of players allowed in this arena."
-                    );
-                    return CommandResult.success();
-                }
+                int recommendedId = arenaManager.getRecommendedId();
 
-                int maxPlayer = Integer.parseInt(value.get());
-                Optional<String> success = arenaManager.add(new Arena(id, maxPlayer), false);
+                Optional<String> success = arenaManager.add(new Arena(recommendedId), false);
                 if(success.isPresent()) {
                     messageHandler.send(
                         player,
@@ -111,9 +112,8 @@ public class SetupCommand implements Command {
                     messageHandler.send(
                         player,
                         MessageHandler.Level.SUCCESS,
-                        "Successfully created the arena with the id %d and a max-player amount of %d.",
-                        id,
-                        maxPlayer
+                        "Successfully created the arena with the id %d.",
+                        recommendedId
                     );
                 }
 
@@ -268,13 +268,15 @@ public class SetupCommand implements Command {
                 //--- validate if the button is also attached to EMERALD_BLOCK
                 if(conditions) {
                     BlockRayHit<World> hit = blockRay.get();
-                    Vector3d face = hit.getDirection().negate();
-                    conditions = hit.getExtent().getBlockType(hit.getLocation().sub(face).getBlockPosition()) == BlockTypes.EMERALD_BLOCK;
+                    Direction direction = hit.getExtent().getBlock(hit.getBlockPosition()).get(Keys.DIRECTION).get();
+                    conditions = hit.getExtent().getBlockType(
+                            hit.getLocation().add(direction.getOpposite().asOffset()).getBlockPosition()
+                    ) == BlockTypes.EMERALD_BLOCK;
                 }
 
                 if(conditions) {
 
-
+                        messageHandler.send(player, "AAAAAAAAAAAAAAAAAAAAAAA");
 
                 } else {
                     messageHandler.send(

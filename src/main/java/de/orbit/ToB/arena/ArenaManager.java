@@ -44,14 +44,14 @@ public class ArenaManager implements Component {
     public Optional<String> add(Arena arena, boolean load) {
 
         //--- If the max player amount is high enough
-        if(arena.getMaxPlayers() < 2) {
-            return Optional.of("An arena must at least hold 2 players.");
-        }
+        //if(arena.getMaxPlayers() < 2) {
+        //    return Optional.of("An arena must at least hold 2 players.");
+        //}
 
         //--- If the amount of max-players is even.
-        if(!(arena.getMaxPlayers() % 2 == 0)) {
-            return Optional.of("The max player amount must be dividable by 2 to ensure balanced game-play.");
-        }
+        //if(!(arena.getMaxPlayers() % 2 == 0)) {
+        //    return Optional.of("The max player amount must be dividable by 2 to ensure balanced game-play.");
+        //}
 
         //--- @TODO Load arena from database, if it does exist, otherwise ignore(?) the call. I don't know yet.
 

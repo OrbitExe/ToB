@@ -38,11 +38,9 @@ public class Arena {
     private Location<World> redButton;
     private Location<World> blueButton;
 
-    public Arena(int identifier, int maxPlayers) {
+    public Arena(int identifier) {
 
         this.identifier = identifier;
-        this.maxPlayers = maxPlayers;
-
     }
 
     /**

@@ -3,6 +3,7 @@ package de.orbit.ToB.command;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import de.orbit.ToB.ToB;
+import de.orbit.ToB.command.commands.SetupCommand;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -56,6 +57,11 @@ public class MainCommand implements Command {
                             .executor(this);
 
         subCommands.forEach(e -> builder.child(e.getCommandSpec(), e.commands()));
+
+
+        //TODO
+        SetupCommand command = new SetupCommand();
+        builder.child(command.getCommandSpec(), command.commands());
 
         return builder.build();
     }

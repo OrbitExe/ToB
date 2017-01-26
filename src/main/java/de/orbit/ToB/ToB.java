@@ -79,7 +79,6 @@ public class ToB {
         MainCommand mainCommand = new MainCommand();
         Sponge.getCommandManager().register(this, mainCommand.getCommandSpec(), mainCommand.commands());
 
-
     }
 
     @Listener
