@@ -3,17 +3,21 @@ package de.orbit.ToB.arena;
 import de.orbit.ToB.arena.team.TeamType;
 import org.spongepowered.api.block.tileentity.Sign;
 
-public class ArenaSignEntry {
+public class ArenaSignEntry<T> {
+
+    private T content;
 
     private Sign sign;
-    private Arena.SignType signType;
+    private SignType signType;
     private TeamType team;
 
-    public ArenaSignEntry(Sign sign, Arena.SignType signType, TeamType team) {
+    public ArenaSignEntry(Sign sign, SignType signType, TeamType team, T content) {
         this.sign = sign;
         this.signType = signType;
         this.team = team;
+        this.content = content;
     }
+
 
     /**
      * <p>
@@ -26,6 +30,11 @@ public class ArenaSignEntry {
         return this.sign;
     }
 
+
+    public T getContent() {
+        return this.content;
+    }
+
     /**
      * <p>
      *     The sign type.
@@ -33,7 +42,7 @@ public class ArenaSignEntry {
      *
      * @return
      */
-    public Arena.SignType getSignType() {
+    public SignType getSignType() {
         return this.signType;
     }
 
@@ -46,6 +55,13 @@ public class ArenaSignEntry {
      */
     public TeamType getTeam() {
         return this.team;
+    }
+
+    public enum SignType {
+
+        LOBBY,
+        CLASS;
+
     }
 
 }

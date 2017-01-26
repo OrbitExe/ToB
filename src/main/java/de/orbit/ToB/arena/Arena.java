@@ -19,6 +19,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Arena {
 
@@ -27,7 +28,9 @@ public class Arena {
     private ArenaState arenaState = ArenaStates.DISABLED;
 
     private List<ArenaPlayer> players = new ArrayList<>();
+
     private List<ArenaSignEntry> signs = new ArrayList<>();
+    private List<ArenaPlateEntry> pressurePlates = new ArrayList<>();
 
     private int maxPlayers;
 
@@ -133,6 +136,18 @@ public class Arena {
 
     /**
      * <p>
+     *    Gives the plates for the provided team.
+     * </p>
+     *
+     * @param teamType
+     * @return
+     */
+    public List<ArenaPlateEntry> getPlates(TeamType teamType) {
+        return this.pressurePlates.stream().filter(e -> e.getTeam() == teamType).collect(Collectors.toList());
+    }
+
+    /**
+     * <p>
      *     The max amount of players this arena
      * </p>
      *
@@ -141,6 +156,18 @@ public class Arena {
     public int getMaxPlayers() {
         return this.maxPlayers;
     }
+
+
+    /**
+     * <p>
+     *    Gives a list of all related signs.
+     * </p>
+     * @return
+     */
+    public List<ArenaSignEntry> getSigns() {
+        return this.signs;
+    }
+
 
     /**
      * <p>
@@ -245,6 +272,17 @@ public class Arena {
 
     /**
      * <p>
+     *     Sets the max amount of players for this arena.
+     * </p>
+     *
+     * @param maxPlayers
+     */
+    public void setMaxPlayers(int maxPlayers) {
+        this.maxPlayers = maxPlayers;
+    }
+
+    /**
+     * <p>
      *    Gives the corresponding {@link ArenaPlayer} if it does exist in the arena, otherwise is the Optional empty.
      * </p>
      *
@@ -274,7 +312,7 @@ public class Arena {
      */
     public void updateSigns() {
         //--- Update all LOBBY signs
-        this.signs.stream().filter(e -> e.getSignType() == SignType.LOBBY).forEach(e -> {
+        this.signs.stream().filter(e -> e.getSignType() == ArenaSignEntry.SignType.LOBBY).forEach(e -> {
 
             Sign sign = e.getSign();
             SignData signData = sign.getSignData();
@@ -304,7 +342,7 @@ public class Arena {
         });
 
         //--- Update all CLASS signs
-        this.signs.stream().filter(e -> e.getSignType() == SignType.CLASS).forEach(e -> {
+        this.signs.stream().filter(e -> e.getSignType() == ArenaSignEntry.SignType.CLASS).forEach(e -> {
 
             Sign sign = e.getSign();
             SignData signData = sign.get(SignData.class).get();
@@ -355,9 +393,16 @@ public class Arena {
      * @param signType
      * @param teamType
      * @param sign
+     * @param content
      */
-    public void addSign(SignType signType, TeamType teamType, Sign sign) {
-        this.signs.add(new ArenaSignEntry(sign, signType, teamType));
+    public <T> void addSign(ArenaSignEntry.SignType signType, TeamType teamType, Sign sign, T content) {
+        //@TODO check if the sign already exists
+        this.signs.add(new ArenaSignEntry<>(sign, signType, teamType, content));
+    }
+
+    public void addPlate(Location<World> location, TeamType teamType) {
+        //@TODO check if it already exits
+        this.pressurePlates.add(new ArenaPlateEntry(location, teamType));
     }
 
     /**
@@ -369,8 +414,8 @@ public class Arena {
      * @param location
      * @return
      */
-    public boolean existsSign(SignType signType, Location<World> location) {
-        return this.signs.stream().anyMatch(e -> e.getSignType() == signType && location.equals(location));
+    public boolean existsSign(ArenaSignEntry.SignType signType, Location<World> location) {
+        return this.signs.stream().anyMatch(e -> e.getSignType() == signType && e.getSign().getLocation().equals(location));
     }
 
     /**
@@ -411,12 +456,4 @@ public class Arena {
 
         return new Location<>(a.getExtent(), maxX, maxY, maxZ);
     }
-
-    public enum SignType {
-
-        LOBBY,
-        CLASS;
-
-    }
-
 }

@@ -4,6 +4,7 @@ import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
 import de.orbit.ToB.arena.ArenaPlayer;
+import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
 import de.orbit.ToB.classes.GameClass;
@@ -60,7 +61,7 @@ public class SignListener  {
 
         //--- We have to handle multiple cases
         //--- 1.: if somebody clicks on a class sign
-        if(arena.existsSign(Arena.SignType.CLASS, entity.getLocation())) {
+        if(arena.existsSign(ArenaSignEntry.SignType.CLASS, entity.getLocation())) {
 
             GameClass gameClass = GameClasses.toClass(value).get();
             gameClass.apply(player);

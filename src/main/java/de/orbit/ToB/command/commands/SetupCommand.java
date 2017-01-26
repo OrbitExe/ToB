@@ -1,16 +1,18 @@
 package de.orbit.ToB.command.commands;
 
-import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
 import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
+import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
+import de.orbit.ToB.classes.GameClass;
+import de.orbit.ToB.classes.GameClasses;
 import de.orbit.ToB.command.Command;
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -31,9 +33,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public class SetupCommand implements Command {
 
@@ -58,6 +58,7 @@ public class SetupCommand implements Command {
                             this.put("button", "button");
                             this.put("plate", "plate");
                             this.put("spawn", "spawn");
+                            this.put("max-players", "max-players");
                         }}, true),
                         GenericArguments.optional(
                             GenericArguments.integer(Text.of("id"))
@@ -67,14 +68,15 @@ public class SetupCommand implements Command {
                         )
                     )
                 )
-                .build();
+            .build();
     }
 
     @Override
     public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
 
-        Optional<Integer> id = commandContext.getOne("id");
         String action = commandContext.<String>getOne("action").get();
+
+        Optional<Integer> id = commandContext.getOne("id");
         Optional<String> value = commandContext.getOne("value");
 
         ArenaManager arenaManager = ToB.get(ArenaManager.class);
@@ -88,16 +90,6 @@ public class SetupCommand implements Command {
         switch (action.toLowerCase()) {
 
             case "create": {
-
-                if(arenaOptional.isPresent()) {
-                    messageHandler.send(
-                            player,
-                            MessageHandler.Level.ERROR,
-                            "An arena with the id %d already exists. Please choose another available id. Recommended ID: %d",
-                            id, arenaManager.getRecommendedId()
-                    );
-                    return CommandResult.success();
-                }
 
                 int recommendedId = arenaManager.getRecommendedId();
 
@@ -120,16 +112,55 @@ public class SetupCommand implements Command {
             }
             break;
 
-            case "sign": {
+            case "max-players": {
 
-                //--- Check if the arena exists
-                if(!(arenaOptional.isPresent())) {
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
+                    return CommandResult.success();
+                }
+
+                //--- if the value for the amount of players exists
+                if(!(value.isPresent())) {
                     messageHandler.send(
                         player,
                         MessageHandler.Level.ERROR,
-                        "An arena with the id %d does not exists.",
-                        id
+                        "Please provide as value the max amount of players which can join the arena."
                     );
+                    return CommandResult.success();
+                }
+
+                Arena arena = arenaOptional.get();
+                int amount = Integer.parseInt(value.get());
+
+                //--- Check if the amount of players is dividable by 2, because we wanna have a even player distribution
+                // across both teams in the bast case.
+                if(amount % 2 == 0) {
+                    arena.setMaxPlayers(amount);
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.SUCCESS,
+                        "Set the max amount of players for arena %d to %d.",
+                        arena.getIdentifier(),
+                        amount
+                    );
+                    CommandResult.success();
+                } else {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "The max amount of players must be dividable by 2 to ensure a even player distribution."
+                    );
+                    return CommandResult.success();
+                }
+
+            }
+            break;
+
+            /*
+             * Setting signs.
+             */
+            case "sign": {
+
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
                     return CommandResult.success();
                 }
 
@@ -161,8 +192,27 @@ public class SetupCommand implements Command {
 
                             if(teamType.isPresent()) {
 
-                                arena.addSign(Arena.SignType.CLASS, teamType.get(), tileEntity);
+                                Optional<GameClass> gameClass = GameClasses.toClass(signValue);
+
+                                if(!(gameClass.isPresent())) {
+                                    messageHandler.send(
+                                        player,
+                                        MessageHandler.Level.ERROR,
+                                        "The game class %s does not exist.",
+                                        signValue
+                                    );
+                                    return CommandResult.success();
+                                }
+
+                                arena.addSign(ArenaSignEntry.SignType.CLASS, teamType.get(), tileEntity, gameClass.get());
                                 arena.updateSigns();
+
+                                messageHandler.send(
+                                    player,
+                                    MessageHandler.Level.SUCCESS,
+                                    "Successfully added the %s class sign.",
+                                    gameClass.get().displayName()
+                                );
 
                             } else {
                                 messageHandler.send(
@@ -181,13 +231,13 @@ public class SetupCommand implements Command {
                         case "lobby": {
 
                             //--- Add & Update sign and send success message
-                            arena.addSign(Arena.SignType.LOBBY, null, tileEntity);
+                            arena.addSign(ArenaSignEntry.SignType.LOBBY, null, tileEntity, null);
                             arena.updateSigns();
 
                             messageHandler.send(
                                 player,
                                 MessageHandler.Level.SUCCESS,
-                                "Successfully the arena lobby sign."
+                                "Successfully added the arena lobby sign."
                             );
 
                         }
@@ -218,36 +268,25 @@ public class SetupCommand implements Command {
             }
             break;
 
-            /**
-             * Setting the button points in the arena.
+            /*
+              Setting the button points in the arena.
              */
             case "button": {
 
-                //--- Check if the arena exists
-                if(!(arenaOptional.isPresent())) {
-                    messageHandler.send(
-                        player,
-                        MessageHandler.Level.ERROR,
-                        "An arena with the id %d does not exists.",
-                        id
-                    );
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
                     return CommandResult.success();
                 }
 
                 Arena arena = arenaOptional.get();
 
                 //--- if the value for the team does not exist
-                if(
-                    !(value.isPresent()) ||
-                        (
-                            !(value.get().equalsIgnoreCase("red")) &&
-                            !(value.get().equalsIgnoreCase("blue"))
-                        )
-                ) {
+                if(!(value.isPresent()) || !TeamTypes.toTeam(value.get()).isPresent()) {
                     messageHandler.send(
-                            player,
-                            MessageHandler.Level.ERROR,
-                            "Please provide the name of the team you wanna set the button of: red or blue."
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "Please provide the name of the team you wanna set the button of: %s or %s.",
+                        TeamTypes.RED.displayName(),
+                        TeamTypes.BLUE.displayName()
                     );
                     return CommandResult.success();
                 }
@@ -261,7 +300,7 @@ public class SetupCommand implements Command {
                         .stopFilter(e -> e.getExtent().getBlockType(e.getBlockPosition()) != BlockTypes.AIR)
                         .distanceLimit(3)
                         .build()
-                        .end();
+                    .end();
 
                 boolean conditions = blockRay.isPresent();
 
@@ -274,9 +313,22 @@ public class SetupCommand implements Command {
                     ) == BlockTypes.EMERALD_BLOCK;
                 }
 
+                //--- Looking at a BUTTON & the button is attached to a EMERALD block
                 if(conditions) {
 
-                        messageHandler.send(player, "AAAAAAAAAAAAAAAAAAAAAAA");
+                    TeamType teamType = TeamTypes.toTeam(value.get()).get();
+
+                    arena.setButtonPoint(
+                        teamType,
+                        blockRay.get().getLocation()
+                    );
+
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.SUCCESS,
+                        "Successfully set the win button of the %s team.",
+                        teamType.displayName()
+                    );
 
                 } else {
                     messageHandler.send(
@@ -291,23 +343,104 @@ public class SetupCommand implements Command {
             }
             break;
 
+            /*
+              Setting the plates of the arena.
+             */
             case "plate": {
 
-            }
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
+                    return CommandResult.success();
+                }
 
-            /**
-             * Setting spawn points in the arena.
+                Arena arena = arenaOptional.get();
+                Location<World> location = player.getLocation();
+                BlockState pressurePlate = location.getBlock();
+
+                //--- Check if the player set the amount of players
+                if(arena.getMaxPlayers() <= 0) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "Please set the max amount of players for this arena before adding plates to it."
+                    );
+                    return CommandResult.success();
+                }
+
+                //--- Checking if it is a STONE_PRESSURE_PLATE
+                if(!(pressurePlate.getType() == BlockTypes.STONE_PRESSURE_PLATE)) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "Please go on a stone pressure plate."
+                    );
+                    return CommandResult.success();
+                }
+
+                BlockState blockState = player.getLocation().add(0, -1, 0).getBlock();
+
+                //--- Checking if the block BELOW the pressure plate is a GOLD_BLOCK
+                if(!(blockState.getType() == BlockTypes.GOLD_BLOCK)) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "The pressure plate must be placed on a gold block."
+                    );
+                    return CommandResult.success();
+                }
+
+                //--- if the value for the spawn does not exist
+                if(!(value.isPresent()) || !(TeamTypes.toTeam(value.get()).isPresent())) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "Please provide the team name you wanna add a pressure plate for: %s or %s.",
+                        TeamTypes.RED.displayName(),
+                        TeamTypes.BLUE.displayName()
+                    );
+                    return CommandResult.success();
+                }
+
+                //--- Setting
+                TeamType teamType = TeamTypes.toTeam(value.get()).get();
+
+                int count = arena.getPlates(teamType).size();
+
+                //--- Check if we already have enough plates for this team.
+                // We wanna have (n / 2) - 1 plates per team. All standing on the plates except one guy pressing the hutton
+                // in the best case.
+                if(count == (arena.getMaxPlayers() / 2 - 1)) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "The team has already %d plate(s). You cannot add anymore for team %s.",
+                        count,
+                        teamType.displayName()
+                    );
+                    return CommandResult.success();
+                }
+
+                arena.addPlate(location, teamType);
+
+                messageHandler.send(
+                        player, blockState.getType().getName()
+                );
+                messageHandler.send(
+                    player,
+                    MessageHandler.Level.SUCCESS,
+                    "You have successfully added the plate for team %s. You have to add %d more to complete the setup for this team.",
+                    teamType.displayName(),
+                    ((arena.getMaxPlayers() / 2 - 1) - (count + 1))
+                );
+
+            }
+            break;
+
+            /*
+              Setting spawn points in the arena.
              */
             case "spawn": {
 
-                //--- Check if the arena exists
-                if(!(arenaOptional.isPresent())) {
-                    messageHandler.send(
-                            player,
-                            MessageHandler.Level.ERROR,
-                            "An arena with the id %d does not exists.",
-                            id
-                    );
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
                     return CommandResult.success();
                 }
 
@@ -315,61 +448,88 @@ public class SetupCommand implements Command {
                 if(
                     !(value.isPresent()) ||
                     (
-                        !(value.get().equalsIgnoreCase("red")) &&
-                        !(value.get().equalsIgnoreCase("blue")) &&
+                        !(value.get().equalsIgnoreCase(TeamTypes.RED.displayName())) &&
+                        !(value.get().equalsIgnoreCase(TeamTypes.BLUE.displayName())) &&
                         !(value.get().equalsIgnoreCase("lobby"))
                     )
                 ) {
                     messageHandler.send(
                         player,
                         MessageHandler.Level.ERROR,
-                        "Please provide the position name you wanna set the spawn of: red, blue or lobby."
+                        "Please provide the team name you wanna set the spawn of: %s, %s or lobby.",
+                        TeamTypes.RED.displayName(),
+                        TeamTypes.BLUE.displayName()
                     );
                     return CommandResult.success();
                 }
 
                 Arena arena = arenaOptional.get();
 
-                switch (value.get().toLowerCase()) {
-
-                    case "red":
-                        arena.setSpawnPoint(TeamTypes.RED, player.getLocation());
-                        messageHandler.send(
+                if(TeamTypes.RED.displayName().equalsIgnoreCase(value.get())) {
+                    arena.setSpawnPoint(TeamTypes.RED, player.getLocation());
+                    messageHandler.send(
                             player,
                             MessageHandler.Level.SUCCESS,
-                            "Successfully set the spawn of the red team for arena %s at your location.",
-                            TeamTypes.RED.displayName()
-                        );
-                        break;
-
-                    case "blue":
-                        arena.setSpawnPoint(TeamTypes.BLUE, player.getLocation());
-                        messageHandler.send(
+                            "Successfully set the spawn of the %s team for arena %d at your location.",
+                            TeamTypes.RED.displayName(),
+                            arena.getIdentifier()
+                    );
+                } else if(TeamTypes.BLUE.displayName().equalsIgnoreCase(value.get())) {
+                    arena.setSpawnPoint(TeamTypes.BLUE, player.getLocation());
+                    messageHandler.send(
                             player,
                             MessageHandler.Level.SUCCESS,
-                            "Successfully set the spawn of the red team for arena %s at your location.",
-                            TeamTypes.BLUE.displayName()
-                        );
-                        break;
-
-                    case "lobby":
-                        arena.setLobbyPoint(player.getLocation());
-                        messageHandler.send(
-                                player,
-                                MessageHandler.Level.SUCCESS,
-                                "Successfully set the lobby point of the arena for arena %s at your location.",
-                                TeamTypes.BLUE.displayName()
-                        );
-                        break;
-
+                            "Successfully set the spawn of the %s team for arena %d at your location.",
+                            TeamTypes.BLUE.displayName(),
+                            arena.getIdentifier()
+                    );
+                } else if(value.get().equalsIgnoreCase("lobby")) {
+                    arena.setLobbyPoint(player.getLocation());
+                    messageHandler.send(
+                            player,
+                            MessageHandler.Level.SUCCESS,
+                            "Successfully set the lobby point of the arena for arena %d at your location.",
+                            arena.getIdentifier()
+                    );
+                } else {
+                    throw new NotImplementedException("Not implemented yet.");
                 }
 
             }
-
             break;
 
         }
 
         return CommandResult.success();
     }
+
+    private boolean isArenaPresent(Player player, Optional<Integer> id, Optional<Arena> arenaOptional) {
+
+        MessageHandler messageHandler = ToB.get(MessageHandler.class);
+
+        //--- Check if ID provided
+        if(!(id.isPresent())) {
+            messageHandler.send(
+                    player,
+                    MessageHandler.Level.ERROR,
+                    "Please provide a valid arena id."
+            );
+            return false;
+        }
+
+        //--- Check if the arena exists
+        if(!(arenaOptional.isPresent())) {
+            messageHandler.send(
+                    player,
+                    MessageHandler.Level.ERROR,
+                    "An arena with the id %d does not exists.",
+                    id.get()
+            );
+            return false;
+        }
+
+        return true;
+
+    }
+
 }
