@@ -148,6 +148,17 @@ public class Arena {
 
     /**
      * <p>
+     *    Gives all plates of the arena.
+     * </p>
+     *
+     * @return
+     */
+    public List<ArenaPlateEntry> getPlates() {
+        return this.pressurePlates.stream().collect(Collectors.toList());
+    }
+
+    /**
+     * <p>
      *     The max amount of players this arena
      * </p>
      *

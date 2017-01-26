@@ -149,6 +149,20 @@ public class ArenaManager implements Component {
 
             object.add("signs", signs);
 
+            //--- All plates
+            JsonArray plates = new JsonArray();
+            arena.getPlates().forEach(e -> {
+
+                JsonObject plateObject = new JsonObject();
+
+                plateObject.addProperty("team", e.getTeam().displayName());
+                plateObject.add("location", serializeLocation(e.getLocation()));
+
+                plates.add(plateObject);
+
+            });
+            object.add("plates", plates);
+
             //--- Add to the list
             arenaObjects.add(object);
 
