@@ -7,6 +7,7 @@ import de.orbit.ToB.arena.ArenaManager;
 import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
+import de.orbit.ToB.arena.validator.ArenaValidator;
 import de.orbit.ToB.classes.GameClass;
 import de.orbit.ToB.classes.GameClasses;
 import de.orbit.ToB.command.Command;
@@ -26,6 +27,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.util.blockray.BlockRayHit;
@@ -33,7 +37,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 public class SetupCommand implements Command {
@@ -509,14 +513,37 @@ public class SetupCommand implements Command {
                     return CommandResult.success();
                 }
 
-                Map<String, MessageHandler.Level> errors = arenaManager.validateArena(arenaOptional.get());
+                ArenaValidator validator = new ArenaValidator(arenaOptional.get());
+                List<ArenaValidator.ArenaValidatorEntry> results = validator.validate();
 
-                if(errors.isEmpty()) {
+                Text.Builder builder = Text.builder();
 
-                } else {
-                    messageHandler.sendList(player, "Errors", errors);
-                }
+                results.forEach(e -> {
 
+                    Text.Builder tmp = Text.builder();
+
+                    //--- Prefix
+                    char c = e.isValid() ? '✔' : '✘';
+                    TextColor color = e.isValid() ? TextColors.GREEN : TextColors.DARK_RED;
+
+                    tmp.append(
+                        Text.builder("[" + c + "] ").color(color).build()
+                    );
+
+                    //--- Description & Message
+                    tmp.append(
+                        Text.builder().append(e.displayName())
+                            .onClick(TextActions.executeCallback(p -> p.sendMessage(e.getDescription())))
+                        .build()
+                    );
+
+                    tmp.append(Text.NEW_LINE);
+
+                    builder.append(tmp.build());
+
+                });
+
+                player.sendMessage(builder.build());
 
             }
             break;
