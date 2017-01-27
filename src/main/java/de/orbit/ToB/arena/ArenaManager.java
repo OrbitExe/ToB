@@ -4,17 +4,17 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.orbit.ToB.Component;
+import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
+import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
 import de.orbit.ToB.classes.GameClass;
+import de.orbit.ToB.classes.GameClasses;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ArenaManager implements Component {
 
@@ -183,8 +183,115 @@ public class ArenaManager implements Component {
      * @param arena
      * @return
      */
-    public List<String> validateArena(Arena arena) {
-        throw new IllegalArgumentException("Not implemented yet.");
+    public Map<String, MessageHandler.Level> validateArena(Arena arena) {
+
+        Map<String, MessageHandler.Level> errors = new LinkedHashMap<>();
+
+        //--- Check if enough players are set & n % 2
+        if(arena.getMaxPlayers() < 2) {
+            errors.put("You need to set the max player amount to at least 2.", MessageHandler.Level.ERROR);
+        }
+
+        if(!(arena.getMaxPlayers() % 2 == 0)) {
+            errors.put("You need to set the max player to a value that is dividable by 2..", MessageHandler.Level.ERROR);
+        }
+
+        //--- Check if buttons have been set
+        if(arena.getButton(TeamTypes.BLUE) == null) {
+            errors.put(String.format("You haven't set the button for the %s team yet.", TeamTypes.BLUE.displayName()), MessageHandler.Level.ERROR);
+        }
+
+        if(arena.getButton(TeamTypes.RED) == null) {
+            errors.put(String.format("You haven't set the button for the %s team yet.", TeamTypes.RED.displayName()), MessageHandler.Level.ERROR);
+        }
+
+        //--- Check if enough plates have been set
+        if(arena.getMaxPlayers() >= 2) {
+            int requiredPlates = arena.getMaxPlayers() / 2 - 1;
+            int redPlates = arena.getPlates(TeamTypes.RED).size();
+            int bluePlates = arena.getPlates(TeamTypes.RED).size();
+
+            if (redPlates < requiredPlates) {
+                errors.put(String.format("You have to add %d more plates for the %s team", (requiredPlates - redPlates), TeamTypes.RED.displayName()), MessageHandler.Level.ERROR);
+            }
+
+            if (bluePlates < requiredPlates) {
+                errors.put(String.format("You have to add %d more plates for the %s team", (requiredPlates - bluePlates), TeamTypes.BLUE.displayName()), MessageHandler.Level.ERROR);
+            }
+        }
+
+        //--- Check if at least one game class sign has been set yet
+        int gameClassesRed = arena.getGameClassesSigns(TeamTypes.RED, true).size();
+        int gameClassesBlue = arena.getGameClassesSigns(TeamTypes.BLUE, true).size();
+        int possibleClasses = GameClasses.values().length;
+        if(gameClassesRed < possibleClasses) {
+            if(gameClassesRed == 0) {
+                errors.put(
+                    String.format(
+                        "You need at least one game class sign for team %s.",
+                        TeamTypes.RED.displayName()
+                    ),
+                    MessageHandler.Level.ERROR
+                );
+            } else {
+                errors.put(
+                    String.format(
+                        "You have only set %d out of %d possible game classes for team %s.",
+                        gameClassesRed,
+                        possibleClasses,
+                        TeamTypes.RED.displayName()
+                    ),
+                    MessageHandler.Level.INFO
+                );
+            }
+        }
+
+        if(gameClassesRed < possibleClasses) {
+            if(gameClassesRed == 0) {
+                errors.put(
+                    String.format(
+                            "You need at least one game class sign for team %s.",
+                        TeamTypes.BLUE.displayName()
+                    ),
+                    MessageHandler.Level.ERROR
+                );
+            } else {
+                errors.put(
+                    String.format(
+                        "You have only set %d out of %d possible game classes for team %s.",
+                            gameClassesBlue,
+                            possibleClasses,
+                            TeamTypes.BLUE.displayName()
+                    ),
+                    MessageHandler.Level.INFO
+                );
+            }
+        }
+
+        //--- Check for lobby & spawn points
+        if(arena.getSpawnPoint(TeamTypes.RED) == null) {
+            errors.put(
+                String.format("You haven't set a spawn for team %s yet.", TeamTypes.RED.displayName()),
+                MessageHandler.Level.ERROR
+            );
+        }
+
+        if(arena.getSpawnPoint(TeamTypes.BLUE) == null) {
+            errors.put(
+                String.format("You haven't set a spawn for team %s yet.", TeamTypes.BLUE.displayName()),
+                MessageHandler.Level.ERROR
+            );
+        }
+
+        if(arena.getLobbyPoint() == null) {
+            errors.put(
+                "You haven't set a lobby point for the arena yet.",
+                MessageHandler.Level.ERROR
+            );
+        }
+
+        return errors;
+
     }
 
     @Override

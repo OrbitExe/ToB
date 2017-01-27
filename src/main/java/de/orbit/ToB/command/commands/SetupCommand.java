@@ -33,6 +33,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class SetupCommand implements Command {
@@ -59,6 +60,7 @@ public class SetupCommand implements Command {
                             this.put("plate", "plate");
                             this.put("spawn", "spawn");
                             this.put("max-players", "max-players");
+                            this.put("finish", "finish");
                         }}, true),
                         GenericArguments.optional(
                             GenericArguments.integer(Text.of("id"))
@@ -494,6 +496,27 @@ public class SetupCommand implements Command {
                 } else {
                     throw new NotImplementedException("Not implemented yet.");
                 }
+
+            }
+            break;
+
+            /*
+               FINISH
+             */
+            case "finish": {
+
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
+                    return CommandResult.success();
+                }
+
+                Map<String, MessageHandler.Level> errors = arenaManager.validateArena(arenaOptional.get());
+
+                if(errors.isEmpty()) {
+
+                } else {
+                    messageHandler.sendList(player, "Errors", errors);
+                }
+
 
             }
             break;

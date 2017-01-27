@@ -179,6 +179,32 @@ public class Arena {
         return this.signs;
     }
 
+    /**
+     * <p>
+     *    Gives a list for the related sign type.
+     * </p>
+     * @return
+     */
+    public List<ArenaSignEntry> getGameClassesSigns(TeamType teamType, boolean distinct) {
+        List<GameClass> gameClasses = new ArrayList<>();
+        return this.signs.stream().
+                filter(e -> e.getSignType() == ArenaSignEntry.SignType.CLASS && e.getTeam() == teamType)
+                .filter(e -> {
+
+                    if(!(distinct)) {
+                        return true;
+                    }
+
+                    if(gameClasses.contains(e.getContent())) {
+                        return false;
+                    }
+
+                    gameClasses.add((GameClass) e.getContent());
+                    return true;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     /**
      * <p>

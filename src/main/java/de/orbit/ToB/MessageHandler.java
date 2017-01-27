@@ -5,6 +5,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.util.Map;
+
 public class MessageHandler implements Component {
 
     private final static Text PREFIX = Text.builder()
@@ -48,6 +50,32 @@ public class MessageHandler implements Component {
 
     public void send(Player player, String text) {
         this.send(player, Level.INFO, text);
+    }
+
+    public void sendList(Player player, String title, Map<String, Level> list) {
+
+        Text.Builder builder = Text.builder();
+            builder.append(PREFIX)
+                   .append(SPACE)
+                   .append(Text.of(title))
+                    .append(Text.NEW_LINE);
+
+
+        list.forEach((m, l) -> builder.append(
+            Text.builder()
+                .append(
+                    Text.builder()
+                        .color(TextColors.WHITE)
+                        .append(Text.of("  - "))
+                    .build()
+                )
+                .color(l.color())
+                .append(Text.of(m))
+                .append(Text.NEW_LINE)
+            .build()
+        ));
+
+        player.sendMessage(builder.build());
     }
 
     @Override
