@@ -35,6 +35,9 @@ public class ArenaValidator {
         //--- Player Dividable Rule
         this.rules.put(new PlayerDividableRule(), defaultContainer);
 
+        //--- Same World Rule
+        this.rules.put(new SameWorldRule(), defaultContainer);
+
         //--- Pressure Plate Rule
         this.rules.put(new PressurePlateRule(), redContainer);
         this.rules.put(new PressurePlateRule(), blueContainer);

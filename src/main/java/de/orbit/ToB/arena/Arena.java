@@ -181,8 +181,12 @@ public class Arena {
 
     /**
      * <p>
-     *    Gives a list for the related sign type.
+     *    Gives a list for the related sign type. - If the search is distinct it only returns a maximum of one sign per
+     *    {@link GameClass}. This can be used to check for what GameClasses signs exist more easily.
      * </p>
+     *
+     * @param teamType
+     * @param distinct
      * @return
      */
     public List<ArenaSignEntry> getGameClassesSigns(TeamType teamType, boolean distinct) {
@@ -201,8 +205,7 @@ public class Arena {
 
                     gameClasses.add((GameClass) e.getContent());
                     return true;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
 

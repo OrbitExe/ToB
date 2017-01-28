@@ -25,6 +25,8 @@ import java.util.Map;
 )
 public class ToB {
 
+    public static final int ARENA_MIN_PLAYER = 4;
+
     private final static Map<Class, Component> components = new HashMap<>();
 
     {

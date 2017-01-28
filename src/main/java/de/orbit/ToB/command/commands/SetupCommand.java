@@ -141,7 +141,7 @@ public class SetupCommand implements Command {
 
                 //--- Check if the amount of players is dividable by 2, because we wanna have a even player distribution
                 // across both teams in the bast case.
-                if(amount % 2 == 0) {
+                if(amount % 2 == 0 && amount >= ToB.ARENA_MIN_PLAYER) {
                     arena.setMaxPlayers(amount);
                     messageHandler.send(
                         player,
@@ -155,7 +155,8 @@ public class SetupCommand implements Command {
                     messageHandler.send(
                         player,
                         MessageHandler.Level.ERROR,
-                        "The max amount of players must be dividable by 2 to ensure a even player distribution."
+                        "The max amount of players must be dividable by 2 to ensure a even player distribution and it" +
+                            " must be greater or equals to 4."
                     );
                     return CommandResult.success();
                 }
@@ -430,9 +431,6 @@ public class SetupCommand implements Command {
                 arena.addPlate(location, teamType);
 
                 messageHandler.send(
-                        player, blockState.getType().getName()
-                );
-                messageHandler.send(
                     player,
                     MessageHandler.Level.SUCCESS,
                     "You have successfully added the plate for team %s. You have to add %d more to complete the setup for this team.",
@@ -568,13 +566,29 @@ public class SetupCommand implements Command {
                 builder.append(
                     Text.builder("_______________________").append(Text.NEW_LINE).build()
                 );
+
+                //--- Conclusion
+                TextColor conclusionColor = TextColors.GREEN;
+
+                long success = validator.count(RuleState.FULFILLED);
+                long warning = validator.count(RuleState.ACCEPTABLE);
+                long error = validator.count(RuleState.ERROR);
+
+                if(error > 0) {
+                    conclusionColor = TextColors.DARK_RED;
+                } else if(warning > 0) {
+                    conclusionColor = TextColors.YELLOW;
+                }
+
                 builder.append(
                     Text.builder(
                         String.format(
                             "%.2f%% of the setup completed.",
                             ((validator.count(RuleState.ACCEPTABLE) + validator.count(RuleState.FULFILLED)) / (double) validator.count(null)) * 100
                         )
-                    ).build()
+                    )
+                    .color(conclusionColor)
+                    .build()
                 );
 
                 messageHandler.send(player, builder.build());

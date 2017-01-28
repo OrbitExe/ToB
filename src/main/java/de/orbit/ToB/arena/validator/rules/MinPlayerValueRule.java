@@ -1,5 +1,6 @@
 package de.orbit.ToB.arena.validator.rules;
 
+import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.validator.DataContainer;
 import de.orbit.ToB.arena.validator.Rule;
@@ -44,7 +45,8 @@ public class MinPlayerValueRule implements Rule {
 
             case ERROR:
                 return Text.of(String.format(
-                    "The player value needs to be at least 2. The current value is %d.",
+                    "The player value needs to be at least %d. The current value is %d.",
+                    ToB.ARENA_MIN_PLAYER,
                     arena.getMaxPlayers()
                 ));
         }
@@ -60,7 +62,7 @@ public class MinPlayerValueRule implements Rule {
 
         if(arena.getMaxPlayers() >= 8) {
             return RuleState.FULFILLED;
-        } else if(arena.getMaxPlayers() >= 2) {
+        } else if(arena.getMaxPlayers() >= ToB.ARENA_MIN_PLAYER) {
             return RuleState.ACCEPTABLE;
         }
 
