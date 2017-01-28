@@ -2,6 +2,7 @@ package de.orbit.ToB.classes;
 
 import de.orbit.ToB.arena.ArenaPlayer;
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 
@@ -113,6 +114,11 @@ public enum GameClasses implements GameClass {
 
         return Optional.empty();
 
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.capitalize(this.name().toLowerCase());
     }
 
 }

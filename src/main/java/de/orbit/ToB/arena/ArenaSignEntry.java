@@ -5,13 +5,15 @@ import org.spongepowered.api.block.tileentity.Sign;
 
 public class ArenaSignEntry<T> {
 
+    private Arena arena;
     private T content;
 
     private Sign sign;
     private SignType signType;
     private TeamType team;
 
-    public ArenaSignEntry(Sign sign, SignType signType, TeamType team, T content) {
+    public ArenaSignEntry(Arena arena, Sign sign, SignType signType, TeamType team, T content) {
+        this.arena = arena;
         this.sign = sign;
         this.signType = signType;
         this.team = team;
@@ -55,6 +57,15 @@ public class ArenaSignEntry<T> {
      */
     public TeamType getTeam() {
         return this.team;
+    }
+
+    /**
+     * <p>
+     *    Deletes the sign from the arena.
+     * </p>
+     */
+    public void remove() {
+        this.arena.removeSign(this);
     }
 
     public enum SignType {

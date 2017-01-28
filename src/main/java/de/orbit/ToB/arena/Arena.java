@@ -424,7 +424,7 @@ public class Arena {
 
     /**
      * <p>
-     *    Adds a sign to the arena. It will automatically recieve updates from it.
+     *    Adds a sign to the arena. It will automatically receive updates from it.
      * </p>
      *
      * @param signType
@@ -434,12 +434,31 @@ public class Arena {
      */
     public <T> void addSign(ArenaSignEntry.SignType signType, TeamType teamType, Sign sign, T content) {
         //@TODO check if the sign already exists
-        this.signs.add(new ArenaSignEntry<>(sign, signType, teamType, content));
+        this.signs.add(new ArenaSignEntry<>(this, sign, signType, teamType, content));
     }
 
+    /**
+     * <p>
+     *    Adds a plate to the arena.
+     * </p>
+     *
+     * @param location
+     * @param teamType
+     */
     public void addPlate(Location<World> location, TeamType teamType) {
         //@TODO check if it already exits
         this.pressurePlates.add(new ArenaPlateEntry(location, teamType));
+    }
+
+    /**
+     * <p>
+     *    Removes the sign from this arena.
+     * </p>
+     *
+     * @param arenaSignEntry
+     */
+    public void removeSign(ArenaSignEntry arenaSignEntry) {
+        this.signs.remove(arenaSignEntry);
     }
 
     /**
@@ -493,4 +512,5 @@ public class Arena {
 
         return new Location<>(a.getExtent(), maxX, maxY, maxZ);
     }
+
 }

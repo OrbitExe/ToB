@@ -8,6 +8,7 @@ import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
 import de.orbit.ToB.arena.validator.ArenaValidator;
+import de.orbit.ToB.arena.validator.RuleState;
 import de.orbit.ToB.classes.GameClass;
 import de.orbit.ToB.classes.GameClasses;
 import de.orbit.ToB.command.Command;
@@ -30,6 +31,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.blockray.BlockRay;
 import org.spongepowered.api.util.blockray.BlockRayHit;
@@ -518,24 +520,44 @@ public class SetupCommand implements Command {
 
                 Text.Builder builder = Text.builder();
 
+                builder.append(
+                    Text.builder(
+                        String.format("Status Report - Arena %d", arenaOptional.get().getIdentifier()))
+                        .append(Text.NEW_LINE)
+                    .build()
+                );
+
                 results.forEach(e -> {
 
                     Text.Builder tmp = Text.builder();
+                    RuleState ruleState = e.getRuleState();
 
                     //--- Prefix
-                    char c = e.isValid() ? '✔' : '✘';
-                    TextColor color = e.isValid() ? TextColors.GREEN : TextColors.DARK_RED;
-
                     tmp.append(
-                        Text.builder("[" + c + "] ").color(color).build()
+                        Text.builder("[" + ruleState.c() + "] ")
+                            .color(ruleState.color())
+                            .onHover(
+                                TextActions.showText(
+                                    Text.builder(StringUtils.capitalize(ruleState.name().toLowerCase()))
+                                        .color(ruleState.color())
+                                    .build()
+                                )
+                            )
+                        .build()
                     );
 
                     //--- Description & Message
                     tmp.append(
                         Text.builder().append(e.displayName())
-                            .onClick(TextActions.executeCallback(p -> p.sendMessage(e.getDescription())))
+                            .onClick(
+                                TextActions.executeCallback(
+                                    p -> messageHandler.send(player, e.getDescription().toBuilder().color(e.getRuleState().color()).build())
+                                )
+                            )
+                            .onHover(TextActions.showText(Text.builder("Click Me").style(TextStyles.ITALIC).build()))
                         .build()
                     );
+
 
                     tmp.append(Text.NEW_LINE);
 
@@ -543,8 +565,19 @@ public class SetupCommand implements Command {
 
                 });
 
-                player.sendMessage(builder.build());
+                builder.append(
+                    Text.builder("_______________________").append(Text.NEW_LINE).build()
+                );
+                builder.append(
+                    Text.builder(
+                        String.format(
+                            "%.2f%% of the setup completed.",
+                            ((validator.count(RuleState.ACCEPTABLE) + validator.count(RuleState.FULFILLED)) / (double) validator.count(null)) * 100
+                        )
+                    ).build()
+                );
 
+                messageHandler.send(player, builder.build());
             }
             break;
 

@@ -11,15 +11,24 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ArenaManager implements Component {
 
     private Map<Integer, Arena> arenas = new HashMap<>();
 
     public ArenaManager() {}
+
+    /**
+     * <p>
+     *     A collection of all arenas registered in the arena manager.
+     * </p>
+     *
+     * @return
+     */
+    public Collection<Arena> getArenas() {
+        return this.arenas.values();
+    }
 
     /**
      * <p>

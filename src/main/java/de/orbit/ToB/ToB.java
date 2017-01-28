@@ -3,6 +3,7 @@ package de.orbit.ToB;
 import com.google.inject.Inject;
 import de.orbit.ToB.arena.ArenaManager;
 import de.orbit.ToB.command.MainCommand;
+import de.orbit.ToB.listener.BlockListener;
 import de.orbit.ToB.listener.SignListener;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -68,12 +69,15 @@ public class ToB {
 
     @Listener
     public void onServerStart(GameStartedServerEvent event) {
-        Sponge.getEventManager().registerListeners(this, new SignListener());
+
         ToB.getLogger().info("Kicking off the initializing process to prepare all necessary components.");
         ToB.components.forEach((k, v) -> {
             ToB.getLogger().info(String.format("Setting up %s component.", v.getClass().getSimpleName()));
             v.setup();
         });
+
+        Sponge.getEventManager().registerListeners(this, new SignListener());
+        Sponge.getEventManager().registerListeners(this, new BlockListener());
 
         //--- Commands
         MainCommand mainCommand = new MainCommand();

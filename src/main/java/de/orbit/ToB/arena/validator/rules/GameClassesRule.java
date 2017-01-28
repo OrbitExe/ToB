@@ -5,6 +5,7 @@ import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.validator.DataContainer;
 import de.orbit.ToB.arena.validator.Rule;
+import de.orbit.ToB.arena.validator.RuleState;
 import de.orbit.ToB.classes.GameClass;
 import de.orbit.ToB.classes.GameClasses;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class GameClassesRule implements Rule {
@@ -35,7 +37,7 @@ public class GameClassesRule implements Rule {
         Arena arena = dataContainer.get("arena");
 
         List<ArenaSignEntry> gameClasses = arena.getGameClassesSigns(teamType, true);
-        List<GameClass> all = Arrays.asList(GameClasses.values());
+        List<GameClass> all = new LinkedList<>(Arrays.asList(GameClasses.values()));
 
         gameClasses.forEach(e -> all.remove(e.getContent()));
 
@@ -49,15 +51,15 @@ public class GameClassesRule implements Rule {
                 )
             );
         } else if(all.isEmpty()) {
-            return Text.of(
+            return Text.of(String.format(
                 "You have set for all available game classes corresponding signs for team %s.",
                 teamType.displayName()
-            );
+            ));
         }
 
         return Text.of(
                 String.format(
-                "You have already set game class signs for team %s. - You can add more signs for: %s, however this is optional," +
+                "You have already set game class signs for team %s. - You can add more signs for: %s, however this is optional, " +
                         "because it is not a requirement to give the players access to all classes.",
                 teamType.displayName(),
                 StringUtils.join(all, ", ")
@@ -66,11 +68,20 @@ public class GameClassesRule implements Rule {
     }
 
     @Override
-    public boolean validate(DataContainer dataContainer) {
+    public RuleState validate(DataContainer dataContainer) {
         Arena arena = dataContainer.get("arena");
         TeamType teamType = dataContainer.get("team");
 
-        return (arena.getGameClassesSigns(teamType, true).size() == GameClasses.values().length);
+        int signs = arena.getGameClassesSigns(teamType, true).size();
+
+        if(signs == GameClasses.values().length) {
+            return RuleState.FULFILLED;
+        } else if(signs == 0) {
+            return RuleState.ERROR;
+        }
+
+        return RuleState.ACCEPTABLE;
+
     }
 
 }

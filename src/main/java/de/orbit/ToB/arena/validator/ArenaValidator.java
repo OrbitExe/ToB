@@ -13,6 +13,8 @@ import java.util.Map;
 public class ArenaValidator {
 
     private Map<Rule, DataContainer> rules = new LinkedHashMap<>();
+    private List<ArenaValidatorEntry> results = new LinkedList<>();
+
 
     public ArenaValidator(Arena arena) {
 
@@ -51,17 +53,27 @@ public class ArenaValidator {
 
     }
 
+    public long count(RuleState ruleState) {
+
+        if(!(ruleState == null)) {
+            return this.results.stream().filter(e -> e.getRuleState() == ruleState).count();
+        }
+
+        return this.results.size();
+
+    }
+
     public List<ArenaValidatorEntry> validate() {
 
-        List<ArenaValidatorEntry> results = new LinkedList<>();
+        this.results.clear();
 
-        this.rules.forEach((r, d) -> results.add(new ArenaValidatorEntry(
+        this.rules.forEach((r, d) -> this.results.add(new ArenaValidatorEntry(
             r.displayName(d),
             r.description(d),
             r.validate(d)
         )));
 
-        return results;
+        return this.results;
 
     }
 
@@ -70,12 +82,12 @@ public class ArenaValidator {
         private Text displayName;
         private Text description;
 
-        private boolean isValid;
+        private RuleState ruleState;
 
-        public ArenaValidatorEntry(Text displayName, Text description, boolean isValid) {
+        public ArenaValidatorEntry(Text displayName, Text description, RuleState ruleState) {
             this.displayName = displayName;
             this.description = description;
-            this.isValid = isValid;
+            this.ruleState = ruleState;
         }
 
         public Text displayName() {
@@ -86,8 +98,8 @@ public class ArenaValidator {
             return this.description;
         }
 
-        public boolean isValid() {
-            return this.isValid;
+        public RuleState getRuleState() {
+            return this.ruleState;
         }
 
     }
