@@ -29,39 +29,55 @@ public class ArenaValidator {
         blueContainer.add("arena", arena);
         blueContainer.add("team", TeamTypes.BLUE);
 
-        //--- Sand Volume Rule
-        this.rules.put(new SandRule(), defaultContainer);
-
-        //--- Tower Dimension Rule
-        this.rules.put(new TowerDimensionRule(), defaultContainer);
+        //--- Player Dividable Rule
+        this.rules.put(new PlayerDividableRule(), defaultContainer);
 
         //--- Min Player Value Rule
         this.rules.put(new MinPlayerValueRule(), defaultContainer);
 
-        //--- Player Dividable Rule
-        this.rules.put(new PlayerDividableRule(), defaultContainer);
+        //--- Tower Dimension Rule
+        this.rules.put(new TowerDimensionRule(), defaultContainer);
+
+        //--- Sand Volume Rule
+        this.rules.put(new SandRule(), defaultContainer);
 
         //--- Same World Rule
         this.rules.put(new SameWorldRule(), defaultContainer);
 
-        //--- Pressure Plate Rule
+        //--- Red
         this.rules.put(new PressurePlateRule(), redContainer);
-        this.rules.put(new PressurePlateRule(), blueContainer);
-
-        //--- Button Rule
-        this.rules.put(new ButtonRule(), redContainer);
-        this.rules.put(new ButtonRule(), blueContainer);
-
-        //--- Game Classes Rule
         this.rules.put(new GameClassesRule(), redContainer);
-        this.rules.put(new GameClassesRule(), blueContainer);
-
-        //--- Spawn Point Rule
         this.rules.put(new SpawnPointRule(), redContainer);
+        this.rules.put(new ButtonRule(), redContainer);
+
+
+        //--- Blue
+        this.rules.put(new PressurePlateRule(), blueContainer);
+        this.rules.put(new GameClassesRule(), blueContainer);
         this.rules.put(new SpawnPointRule(), blueContainer);
+        this.rules.put(new ButtonRule(), blueContainer);
 
     }
 
+    /**
+     * <p>
+     *    Checks if the arena is valid.
+     * </p>
+     *
+     * @return
+     */
+    public boolean isValid() {
+        return this.count(RuleState.ERROR) == 0;
+    }
+
+    /**
+     * <p>
+     *    Count how many results are in the provided {@link RuleState}.
+     * </p>
+     *
+     * @param ruleState Counts in the result state, if null it returns all combined together.
+     * @return
+     */
     public long count(RuleState ruleState) {
 
         if(!(ruleState == null)) {
@@ -72,6 +88,13 @@ public class ArenaValidator {
 
     }
 
+    /**
+     * <p>
+     *      This method calls {@link Rule#validate(DataContainer)} and related methods to verify the rules.
+     * </p>
+     *
+     * @return
+     */
     public List<ArenaValidatorEntry> validate() {
 
         this.results.clear();
@@ -86,6 +109,11 @@ public class ArenaValidator {
 
     }
 
+    /**
+     * <p>
+     *    This is just a wrapper object. This makes it easier to store results.
+     * </p>
+     */
     public class ArenaValidatorEntry {
 
         private Text displayName;

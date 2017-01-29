@@ -500,7 +500,7 @@ public class Arena {
      */
     public <T> void addSign(ArenaSignEntry.SignType signType, TeamType teamType, Sign sign, T content) {
         //@TODO check if the sign already exists
-        this.signs.add(new ArenaSignEntry<>(this, sign, signType, teamType, content));
+        boolean a = this.signs.add(new ArenaSignEntry<>(this, sign, signType, teamType, content));
     }
 
     /**

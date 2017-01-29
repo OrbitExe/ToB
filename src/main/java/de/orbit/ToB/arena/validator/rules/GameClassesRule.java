@@ -10,7 +10,6 @@ import de.orbit.ToB.classes.GameClass;
 import de.orbit.ToB.classes.GameClasses;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -21,14 +20,7 @@ public class GameClassesRule implements Rule {
     @Override
     public Text displayName(DataContainer dataContainer) {
         TeamType teamType = dataContainer.get("team");
-        return Text.builder().color(teamType.color())
-            .append(
-                Text.builder().color(TextColors.WHITE).append(
-                    Text.of(
-                        String.format("%s - Game Classes", teamType.displayName())
-                    )
-                ).build()
-            ).build();
+        return Text.builder("Game Classes").color(teamType.color()).build();
     }
 
     @Override

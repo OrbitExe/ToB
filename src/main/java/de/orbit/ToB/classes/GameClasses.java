@@ -1,5 +1,6 @@
 package de.orbit.ToB.classes;
 
+import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.ArenaPlayer;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;

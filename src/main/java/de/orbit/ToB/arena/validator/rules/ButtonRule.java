@@ -13,14 +13,7 @@ public class ButtonRule implements Rule {
     @Override
     public Text displayName(DataContainer dataContainer) {
         TeamType teamType = dataContainer.get("team");
-        return Text.builder().color(teamType.color())
-            .append(
-                Text.builder().color(TextColors.WHITE).append(
-                    Text.of(
-                        String.format("%s - Buttons", teamType.displayName())
-                    )
-            ).build()
-        ).build();
+        return Text.builder("Button").color(teamType.color()).build();
     }
 
     @Override

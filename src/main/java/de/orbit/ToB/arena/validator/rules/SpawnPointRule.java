@@ -20,14 +20,7 @@ public class SpawnPointRule implements Rule {
             );
         }
 
-        return Text.builder().color(teamType.color())
-            .append(
-                Text.builder().color(TextColors.WHITE).append(
-                    Text.of(
-                        String.format("%s - Spawn Point", teamType.displayName())
-                    )
-                ).build()
-            ).build();
+        return Text.builder("Spawn Point").color(teamType.color()).build();
     }
 
     @Override

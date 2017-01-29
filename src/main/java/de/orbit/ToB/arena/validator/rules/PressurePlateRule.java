@@ -7,21 +7,13 @@ import de.orbit.ToB.arena.validator.DataContainer;
 import de.orbit.ToB.arena.validator.Rule;
 import de.orbit.ToB.arena.validator.RuleState;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 public class PressurePlateRule implements Rule {
 
     @Override
     public Text displayName(DataContainer dataContainer) {
         TeamType teamType = dataContainer.get("team");
-        return Text.builder().color(teamType.color())
-            .append(
-                Text.builder().color(TextColors.WHITE).append(
-                    Text.of(
-                        String.format("%s - Pressure Plates", teamType.displayName())
-                    )
-                ).build()
-            ).build();
+        return Text.builder("Pressure Plates").color(teamType.color()).build();
     }
 
     @Override

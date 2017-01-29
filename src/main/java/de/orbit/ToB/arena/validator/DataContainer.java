@@ -3,6 +3,12 @@ package de.orbit.ToB.arena.validator;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <p>
+ *    The DataContainer can store references to as many objects as possible. This makes it easier to provide a various
+ *    amount of data and type of data to methods.
+ * </p>
+ */
 public class DataContainer {
 
     private Map<String, Object> container = new HashMap<>();

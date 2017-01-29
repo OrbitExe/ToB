@@ -74,6 +74,8 @@ public class SetupCommand implements Command {
                             this.put("tower-dimension", "tower-dimension");
                             this.put("bound", "bound");
                             this.put("finish", "finish");
+
+                            this.put("load", "load");
                         }}, true),
                         GenericArguments.optional(
                             GenericArguments.integer(Text.of("id"))
@@ -104,11 +106,15 @@ public class SetupCommand implements Command {
         //--- Handling all cases
         switch (action.toLowerCase()) {
 
+            case "load":
+                arenaManager.unserialize();
+                break;
+
             case "create": {
 
                 int recommendedId = arenaManager.getRecommendedId();
 
-                Optional<String> success = arenaManager.add(new Arena(recommendedId), false);
+                Optional<String> success = arenaManager.add(new Arena(recommendedId));
                 if(success.isPresent()) {
                     messageHandler.send(
                         player,
@@ -520,6 +526,10 @@ public class SetupCommand implements Command {
                     return CommandResult.success();
                 }
 
+                ToB.getLogger().info(
+                    ToB.get(ArenaManager.class).serialize()
+                );
+
                 ArenaValidator validator = new ArenaValidator(arenaOptional.get());
                 List<ArenaValidator.ArenaValidatorEntry> results = validator.validate();
 
@@ -577,7 +587,6 @@ public class SetupCommand implements Command {
                 //--- Conclusion
                 TextColor conclusionColor = TextColors.GREEN;
 
-                long success = validator.count(RuleState.FULFILLED);
                 long warning = validator.count(RuleState.ACCEPTABLE);
                 long error = validator.count(RuleState.ERROR);
 
