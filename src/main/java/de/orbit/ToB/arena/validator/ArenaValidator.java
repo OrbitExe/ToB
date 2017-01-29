@@ -29,6 +29,12 @@ public class ArenaValidator {
         blueContainer.add("arena", arena);
         blueContainer.add("team", TeamTypes.BLUE);
 
+        //--- Sand Volume Rule
+        this.rules.put(new SandRule(), defaultContainer);
+
+        //--- Tower Dimension Rule
+        this.rules.put(new TowerDimensionRule(), defaultContainer);
+
         //--- Min Player Value Rule
         this.rules.put(new MinPlayerValueRule(), defaultContainer);
 
@@ -71,9 +77,9 @@ public class ArenaValidator {
         this.results.clear();
 
         this.rules.forEach((r, d) -> this.results.add(new ArenaValidatorEntry(
+            r.validate(d),
             r.displayName(d),
-            r.description(d),
-            r.validate(d)
+            r.description(d)
         )));
 
         return this.results;
@@ -87,7 +93,7 @@ public class ArenaValidator {
 
         private RuleState ruleState;
 
-        public ArenaValidatorEntry(Text displayName, Text description, RuleState ruleState) {
+        public ArenaValidatorEntry(RuleState ruleState, Text displayName, Text description) {
             this.displayName = displayName;
             this.description = description;
             this.ruleState = ruleState;

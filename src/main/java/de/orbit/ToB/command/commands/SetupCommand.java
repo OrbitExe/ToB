@@ -38,11 +38,16 @@ import org.spongepowered.api.util.blockray.BlockRayHit;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SetupCommand implements Command {
+
+    private final static Pattern PATTENR_TOWER_DIMENSION = Pattern.compile("^([0-9]+)(x)([0-9]+)$");
 
     public SetupCommand() {}
 
@@ -66,6 +71,8 @@ public class SetupCommand implements Command {
                             this.put("plate", "plate");
                             this.put("spawn", "spawn");
                             this.put("max-players", "max-players");
+                            this.put("tower-dimension", "tower-dimension");
+                            this.put("bound", "bound");
                             this.put("finish", "finish");
                         }}, true),
                         GenericArguments.optional(
@@ -592,6 +599,103 @@ public class SetupCommand implements Command {
                 );
 
                 messageHandler.send(player, builder.build());
+            }
+            break;
+
+            /*
+               Setting the tower dimension of an arena.
+             */
+            case "tower-dimension": {
+
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
+                    return CommandResult.success();
+                }
+
+                //--- if the value for the dimension exists & is valid
+                Matcher matcher;
+                if(
+                    !(value.isPresent()) ||
+                    !((matcher = SetupCommand.PATTENR_TOWER_DIMENSION.matcher(value.get())).matches())
+                ) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                            "Please provide a valid tower dimension the format is: nxm. n and m are numeric value defining" +
+                                "width and height of the 2D area.",
+                            TeamTypes.RED.displayName(),
+                            TeamTypes.BLUE.displayName()
+                    );
+                    return CommandResult.success();
+                }
+
+                Arena arena = arenaOptional.get();
+
+                Dimension dimension = new Dimension(
+                    Integer.valueOf(matcher.group(1)),
+                    Integer.valueOf(matcher.group(3))
+                );
+
+                arena.setTowerDimension(dimension);
+
+                messageHandler.send(
+                    player,
+                    MessageHandler.Level.SUCCESS,
+                        "You have successfully set the tower dimension to %dx%d for arena %d.",
+                        (int) dimension.getWidth(),
+                        (int) dimension.getHeight(),
+                        arena.getIdentifier()
+                );
+
+            }
+            break;
+
+            case "bound": {
+
+                if(!(this.isArenaPresent(player, id, arenaOptional))) {
+                    return CommandResult.success();
+                }
+
+                //--- if the value for the min or max position exists
+                if(
+                    !(value.isPresent()) ||
+                    (
+                        !(value.get().equalsIgnoreCase("min")) &&
+                        !(value.get().equalsIgnoreCase("max"))
+                    )
+                ) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                            "Please provide the name of the bound you wanna set: min or max as value."
+                    );
+                    return CommandResult.success();
+                }
+
+                Arena arena = arenaOptional.get();
+
+                String boundName = value.get().toLowerCase();
+                Location<World> location = player.getLocation();
+
+                if(boundName.equalsIgnoreCase("min")) {
+                    arena.setBoundaries(
+                        arena.getAreaMax(),
+                        location
+                    );
+                } else {
+                    arena.setBoundaries(
+                        location,
+                        arena.getAreaMin()
+                    );
+                }
+
+                messageHandler.send(
+                    player,
+                    MessageHandler.Level.SUCCESS,
+                        "Successfully set the %s bound for the arena %d at your location.",
+                        boundName,
+                        arena.getIdentifier()
+                );
+
             }
             break;
 

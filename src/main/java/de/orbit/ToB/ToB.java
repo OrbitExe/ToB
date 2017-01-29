@@ -7,10 +7,21 @@ import de.orbit.ToB.listener.BlockListener;
 import de.orbit.ToB.listener.SignListener;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandArgs;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -84,6 +95,18 @@ public class ToB {
         //--- Commands
         MainCommand mainCommand = new MainCommand();
         Sponge.getCommandManager().register(this, mainCommand.getCommandSpec(), mainCommand.commands());
+
+        //--- CW
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .executor((commandSource, commandContext) -> {
+
+                Player player = (Player) commandSource;
+                player.setLocation(Sponge.getServer().getWorld(commandContext.getOne("value").get().toString()).get().getSpawnLocation());
+
+            return CommandResult.success();
+        }).arguments(GenericArguments.optional(
+                        GenericArguments.string(Text.of("value"))
+                )).build(), "cw");
 
     }
 

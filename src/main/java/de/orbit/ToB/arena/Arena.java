@@ -18,7 +18,9 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Arena {
@@ -40,6 +42,11 @@ public class Arena {
 
     private Location<World> redButton;
     private Location<World> blueButton;
+
+    private Location<World> areaMin;
+    private Location<World> areaMax;
+
+    private Dimension towerDimension;
 
     public Arena(int identifier) {
 
@@ -88,6 +95,28 @@ public class Arena {
      */
     public Location<World> getLobbyPoint() {
         return this.lobbyPoint;
+    }
+
+    /**
+     * <p>
+     *    Gives the max boundary point of the arena.
+     * </p>
+     *
+     * @return
+     */
+    public Location<World> getAreaMax() {
+        return this.areaMax;
+    }
+
+    /**
+     * <p>
+     *    Gives the min boundary point of the arena.
+     * </p>
+     *
+     * @return
+     */
+    public Location<World> getAreaMin() {
+        return this.areaMin;
     }
 
     /**
@@ -159,6 +188,18 @@ public class Arena {
 
     /**
      * <p>
+     *    Gives the ground tower dimension in blocks. <br />
+     *    n * m
+     * </p>
+     *
+     * @return
+     */
+    public Dimension getTowerDimension() {
+        return this.towerDimension;
+    }
+
+    /**
+     * <p>
      *     The max amount of players this arena
      * </p>
      *
@@ -167,7 +208,6 @@ public class Arena {
     public int getMaxPlayers() {
         return this.maxPlayers;
     }
-
 
     /**
      * <p>
@@ -208,6 +248,17 @@ public class Arena {
                 }).collect(Collectors.toList());
     }
 
+    /**
+     * <p>
+     *    Gives the corresponding {@link ArenaPlayer} if it does exist in the arena, otherwise is the Optional empty.
+     * </p>
+     *
+     * @param player
+     * @return
+     */
+    public Optional<ArenaPlayer> getPlayer(Player player) {
+        return this.players.stream().filter(e -> e.getPlayer().equals(player.getUniqueId())).findAny();
+    }
 
     /**
      * <p>
@@ -323,14 +374,26 @@ public class Arena {
 
     /**
      * <p>
-     *    Gives the corresponding {@link ArenaPlayer} if it does exist in the arena, otherwise is the Optional empty.
+     *    Sets the area boundaries.
      * </p>
      *
-     * @param player
-     * @return
+     * @param a
+     * @param b
      */
-    public Optional<ArenaPlayer> getPlayer(Player player) {
-        return this.players.stream().filter(e -> e.getPlayer().equals(player.getUniqueId())).findAny();
+    public void setBoundaries(Location<World> a, Location<World> b) {
+
+        if(a == null) {
+            this.areaMin = b;
+            return;
+        }
+
+        if(b == null) {
+            this.areaMax = a;
+            return;
+        }
+
+        this.areaMin = Arena.min(a, b);
+        this.areaMax = Arena.max(a, b);
     }
 
     /**
@@ -451,6 +514,17 @@ public class Arena {
     public void addPlate(Location<World> location, TeamType teamType) {
         //@TODO check if it already exits
         this.pressurePlates.add(new ArenaPlateEntry(location, teamType));
+    }
+
+    /**
+     * <p>
+     *    Sets the tower dimension for the arena.
+     * </p>
+     *
+     * @param towerDimension
+     */
+    public void setTowerDimension(Dimension towerDimension) {
+        this.towerDimension = towerDimension;
     }
 
     /**

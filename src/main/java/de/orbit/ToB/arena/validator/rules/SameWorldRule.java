@@ -68,8 +68,12 @@ public class SameWorldRule implements Rule {
         List<ArenaPlateEntry> bluePlates = arena.getPlates(TeamTypes.BLUE);
         List<ArenaPlateEntry> redPlates = arena.getPlates(TeamTypes.RED);
 
+        //--- Bounds
+        Location<World> arenaMin = arena.getAreaMin();
+        Location<World> arenaMax = arena.getAreaMax();
+
         // Find a location that is not null to use it to compare
-        World comparison = this.findWorld(blueSpawn, redSpawn, blueSigns, redSigns, blueButton, redButton, bluePlates, redPlates);
+        World comparison = this.findWorld(blueSpawn, redSpawn, blueSigns, redSigns, blueButton, redButton, bluePlates, redPlates, arenaMin, arenaMax);
 
         if(!(comparison == null)) {
 
@@ -133,6 +137,15 @@ public class SameWorldRule implements Rule {
                 return RuleState.ERROR;
             }
 
+            //--- Bounds
+            if(arenaMin == null || !(arenaMin.getExtent().equals(comparison))) {
+                return RuleState.ERROR;
+            }
+
+            if(arenaMax == null || !(arenaMax.getExtent().equals(comparison))) {
+                return RuleState.ERROR;
+            }
+
             return RuleState.FULFILLED;
 
         }
@@ -160,7 +173,8 @@ public class SameWorldRule implements Rule {
             Location<World> blueSpawn, Location<World> redSpawn,
             List<ArenaSignEntry> blueSigns, List<ArenaSignEntry> redSigns,
             Location<World> blueButton, Location<World> redButton,
-            List<ArenaPlateEntry> bluePlates, List<ArenaPlateEntry> redPlates
+            List<ArenaPlateEntry> bluePlates, List<ArenaPlateEntry> redPlates,
+            Location<World> areaMin, Location<World> areaMax
     ) {
 
         if(!(blueSpawn == null)) {
@@ -177,6 +191,14 @@ public class SameWorldRule implements Rule {
 
         if(!(redButton == null)) {
             return redButton.getExtent();
+        }
+
+        if(!(areaMin == null)) {
+            return areaMin.getExtent();
+        }
+
+        if(!(areaMax == null)) {
+            return areaMax.getExtent();
         }
 
         if(!(blueSigns.isEmpty())) {
