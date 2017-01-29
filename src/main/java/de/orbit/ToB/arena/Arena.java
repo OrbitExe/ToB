@@ -513,7 +513,18 @@ public class Arena {
      */
     public void addPlate(Location<World> location, TeamType teamType) {
         //@TODO check if it already exits
-        this.pressurePlates.add(new ArenaPlateEntry(location, teamType));
+        this.pressurePlates.add(new ArenaPlateEntry(this, location, teamType));
+    }
+
+    /**
+     * <p>
+     *    Removes the sign from this arena.
+     * </p>
+     *
+     * @param arenaPlateEntry
+     */
+    public void removePlate(ArenaPlateEntry arenaPlateEntry) {
+        this.pressurePlates.remove(arenaPlateEntry);
     }
 
     /**

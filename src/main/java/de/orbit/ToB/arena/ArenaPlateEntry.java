@@ -6,10 +6,12 @@ import org.spongepowered.api.world.World;
 
 public class ArenaPlateEntry {
 
+    private Arena arena;
     private Location<World> location;
     private TeamType team;
 
-    public ArenaPlateEntry(Location<World> location, TeamType team) {
+    public ArenaPlateEntry(Arena arena, Location<World> location, TeamType team) {
+        this.arena = arena;
         this.location = location;
         this.team = team;
     }
@@ -33,6 +35,15 @@ public class ArenaPlateEntry {
      */
     public TeamType getTeam() {
         return this.team;
+    }
+
+    /**
+     * <p>
+     *    Remove this plate from the arena.
+     * </p>
+     */
+    public void remove() {
+        this.arena.removePlate(this);
     }
 
 }

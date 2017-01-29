@@ -84,11 +84,43 @@ public class ArenaManager implements Component {
      * <p>
      *    Returns the arena to the corresponding id. It is empty if no arena with the given id exists.
      * </p>
+     *
      * @param id
      * @return
      */
     public Optional<Arena> get(int id) {
         return Optional.ofNullable(this.arenas.get(id));
+    }
+
+    /**
+     * <p>
+     *  Returns the arena containing the provided location.
+     * </p>
+     *
+     * @param location
+     * @return
+     */
+    public Optional<Arena> get(Location<World> location) {
+
+        return this.arenas.values().stream()
+                .filter(a -> {
+
+                    Location<World> min = a.getAreaMin();
+                    Location<World> max = a.getAreaMax();
+
+                    return (
+                            location.getX() >= min.getX() &&
+                            location.getX() <= max.getX() &&
+
+                            location.getY() >= min.getY() &&
+                            location.getY() <= max.getY() &&
+
+                            location.getZ() >= min.getZ() &&
+                            location.getZ() <= max.getZ()
+                        );
+
+                }).findFirst();
+
     }
 
     /**

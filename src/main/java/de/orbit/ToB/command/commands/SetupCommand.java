@@ -526,10 +526,6 @@ public class SetupCommand implements Command {
                     return CommandResult.success();
                 }
 
-                ToB.getLogger().info(
-                    ToB.get(ArenaManager.class).serialize()
-                );
-
                 ArenaValidator validator = new ArenaValidator(arenaOptional.get());
                 List<ArenaValidator.ArenaValidatorEntry> results = validator.validate();
 
