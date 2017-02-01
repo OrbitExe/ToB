@@ -38,6 +38,9 @@ public class ArenaValidator {
         //--- Tower Dimension Rule
         this.rules.put(new TowerDimensionRule(), defaultContainer);
 
+        //--- Lobby Sign Rule
+        this.rules.put(new LobbySignRule(), defaultContainer);
+
         //--- Sand Volume Rule
         this.rules.put(new SandRule(), defaultContainer);
 

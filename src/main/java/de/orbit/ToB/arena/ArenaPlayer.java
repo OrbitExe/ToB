@@ -14,7 +14,7 @@ public class ArenaPlayer {
         this.player = player;
         this.arena = arena;
 
-        this.backup = this.player.toContainer();
+        this.backup = this.player.toContainer().copy();
     }
 
     /**
@@ -43,6 +43,7 @@ public class ArenaPlayer {
     }
 
     public void prepare() {
+        this.player.getInventory().clear();
     }
 
 }

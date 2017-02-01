@@ -257,7 +257,7 @@ public class Arena {
      * @return
      */
     public Optional<ArenaPlayer> getPlayer(Player player) {
-        return this.players.stream().filter(e -> e.getPlayer().equals(player.getUniqueId())).findAny();
+        return this.players.stream().filter(e -> e.getPlayer().getUniqueId().equals(player.getUniqueId())).findAny();
     }
 
     /**
@@ -267,19 +267,36 @@ public class Arena {
      * </p>
      *
      * @param player
+     * @return true, if successful, otherwise false.
      */
-    public void add(Player player) {
+    public boolean add(Player player) {
 
         ArenaJoiningEvent event = new ArenaJoiningEvent(this, player);
+        event.setCancelled(
+            (
+                !(this.arenaState == ArenaStates.COUNTDOWN) &&
+                !(this.arenaState == ArenaStates.WAITING)
+            ) ||
+            this.players.size() >= this.maxPlayers ||
+            ToB.get(ArenaManager.class).getPlayer(player).isPresent()
+        );
+
         Sponge.getEventManager().post(event);
 
+
         if(event.isCancelled()) {
-            //@TODO Player couldn't join
-            return;
+            return false;
         }
 
-        //@TODO maybe do mare than just adding, probably calling also its setup method
-        this.players.add(new ArenaPlayer(player, this));
+        //--- Add and store (prepare) the player
+        ArenaPlayer arenaPlayer = new ArenaPlayer(player, this);
+        this.players.add(arenaPlayer);
+        arenaPlayer.prepare();
+
+        //--- Update signs
+        this.updateSigns();
+
+        return true;
 
     }
 
@@ -398,18 +415,6 @@ public class Arena {
 
     /**
      * <p>
-     *    Checks if the player is currently in this arena.
-     * </p>
-     *
-     * @param player
-     * @return
-     */
-    public boolean hasPlayer(Player player) {
-        return this.players.stream().anyMatch(e -> e.getPlayer().getUniqueId().equals(player.getUniqueId()));
-    }
-
-    /**
-     * <p>
      *    Updates currently only all lobby-signs related to the arena.
      * </p>
      */
@@ -500,7 +505,7 @@ public class Arena {
      */
     public <T> void addSign(ArenaSignEntry.SignType signType, TeamType teamType, Sign sign, T content) {
         //@TODO check if the sign already exists
-        boolean a = this.signs.add(new ArenaSignEntry<>(this, sign, signType, teamType, content));
+        this.signs.add(new ArenaSignEntry<>(this, sign, signType, teamType, content));
     }
 
     /**
@@ -559,7 +564,7 @@ public class Arena {
      * @return
      */
     public boolean existsSign(ArenaSignEntry.SignType signType, Location<World> location) {
-        return this.signs.stream().anyMatch(e -> e.getSignType() == signType && e.getSign().getLocation().equals(location));
+        return this.signs.stream().anyMatch(e -> e.getSignType() == signType && e.getSign().getLocation().getBlockPosition().equals(location.getBlockPosition()));
     }
 
     /**

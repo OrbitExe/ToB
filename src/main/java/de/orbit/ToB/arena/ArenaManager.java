@@ -6,6 +6,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.orbit.ToB.Component;
 import de.orbit.ToB.ToB;
+import de.orbit.ToB.arena.states.ArenaState;
+import de.orbit.ToB.arena.states.ArenaStates;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
 import de.orbit.ToB.arena.validator.ArenaValidator;
@@ -46,7 +48,7 @@ public class ArenaManager implements Component {
      * @return
      */
     public Optional<ArenaPlayer> getPlayer(Player player) {
-        Optional<Arena> arena = this.arenas.values().stream().filter(e -> e.hasPlayer(player)).findAny();
+        Optional<Arena> arena = this.arenas.values().stream().filter(e -> e.getPlayer(player).isPresent()).findAny();
 
         if(arena.isPresent()) {
             return arena.get().getPlayer(player);
@@ -121,6 +123,12 @@ public class ArenaManager implements Component {
 
                 }).findFirst();
 
+    }
+
+    public Optional<Arena> get(ArenaSignEntry.SignType signType, Location<World> location) {
+        return this.arenas.values().stream()
+                .filter(a -> a.existsSign(signType, location))
+                .findFirst();
     }
 
     /**
@@ -228,9 +236,9 @@ public class ArenaManager implements Component {
 
             //--- All plates
             JsonArray plates = object.getAsJsonArray("plates");
-            plates.forEach(element -> {
+            plates.forEach(plate -> {
 
-                JsonObject plateObject = element.getAsJsonObject();
+                JsonObject plateObject = plate.getAsJsonObject();
 
                 Location<World> location = unserializeLocation(plateObject.getAsJsonObject("location"));
                 TeamType teamType = TeamTypes.toTeam(plateObject.get("team").getAsString()).get();
@@ -245,6 +253,7 @@ public class ArenaManager implements Component {
 
             //if(validator.isValid()) {
                 this.add(arena);
+                arena.setArenaState(ArenaStates.WAITING);
                 ToB.getLogger().info(String.format(
                     "Successfully loaded and validated arena %d.",
                         arena.getIdentifier()

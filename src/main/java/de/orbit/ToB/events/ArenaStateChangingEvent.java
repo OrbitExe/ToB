@@ -4,13 +4,14 @@ import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.states.ArenaState;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.impl.AbstractEvent;
 
 /**
  * <p>
  *    This event gets called if an arena is changing its arena state.
  * </p>
  */
-public class ArenaStateChangingEvent implements Event {
+public class ArenaStateChangingEvent extends AbstractEvent {
 
     private Arena arena;
 

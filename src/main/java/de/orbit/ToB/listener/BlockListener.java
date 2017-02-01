@@ -4,18 +4,17 @@ import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
-import de.orbit.ToB.arena.ArenaPlateEntry;
-import de.orbit.ToB.arena.ArenaSignEntry;
-import de.orbit.ToB.arena.team.TeamType;
+import de.orbit.ToB.arena.states.ArenaStates;
 import de.orbit.ToB.arena.team.TeamTypes;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -52,7 +51,7 @@ public class BlockListener {
                 Player player = playerOptional.get();
 
                 //@TODO Keep track of permission
-                if(!(player.hasPermission("tob.area.modify"))) {
+                if(!(player.hasPermission("tob.area.modify")) || arena.getPlayer(player).isPresent()) {
                     event.setCancelled(true);
                     return;
                 }
@@ -63,7 +62,7 @@ public class BlockListener {
                     arena.getSigns().stream()
                         .filter(sign -> !(sign == null))
                         .filter(
-                            sign -> sign.getSign().getLocation().equals(snapshot.getLocation().get())
+                            sign -> sign.getSign().getLocation().getBlockPosition().equals(snapshot.getLocation().get().getBlockPosition())
                         )
                         .collect(Collectors.toList())
                         .iterator().forEachRemaining(sign -> {
@@ -74,13 +73,12 @@ public class BlockListener {
                                 "You successfully removed a game related sign from the arena."
                             );
                         });
-
                 } else if (blockState.getType() == BlockTypes.STONE_PRESSURE_PLATE) {
 
                     arena.getPlates().stream()
                         .filter(plate -> !(plate == null))
                         .filter(
-                            plate -> plate.getLocation().equals(snapshot.getLocation().get())
+                            plate -> plate.getLocation().getBlockPosition().equals(snapshot.getLocation().get().getBlockPosition())
                         )
                         .collect(Collectors.toList())
                         .iterator().forEachRemaining(plate -> {
@@ -97,7 +95,7 @@ public class BlockListener {
                     Location<World> red = arena.getButton(TeamTypes.RED);
                     Location<World> blue = arena.getButton(TeamTypes.BLUE);
 
-                    if (red.equals(snapshot.getLocation().get())) {
+                    if (red.getBlockPosition().equals(snapshot.getLocation().get().getBlockPosition())) {
                         arena.setButtonPoint(TeamTypes.RED, null);
                         messageHandler.send(
                             player,
@@ -105,7 +103,7 @@ public class BlockListener {
                             "You successfully removed the %s team win button from the arena.",
                                 TeamTypes.RED.displayName()
                         );
-                    } else if (blue.equals(snapshot.getLocation().get())) {
+                    } else if (blue.getBlockPosition().equals(snapshot.getLocation().get().getBlockPosition())) {
                         arena.setButtonPoint(TeamTypes.BLUE, null);
                         messageHandler.send(
                             player,
@@ -131,18 +129,45 @@ public class BlockListener {
         Optional<Arena> arenaOptional = arenaManager.get(event.getExplosion().getLocation());
 
         arenaOptional.ifPresent(e -> {
-
             Explosion original = event.getExplosion();
             event.setExplosion(
-                Explosion.builder()
+                    Explosion.builder()
                     .canCauseFire(false)
                     .location(original.getLocation())
                     .radius(original.getRadius())
-                    .shouldBreakBlocks(true)
+                    .shouldBreakBlocks(false)
                     .shouldDamageEntities(true) //@TODO not sure yet...
                     .shouldPlaySmoke(true)
                 .build()
             );
+        });
+
+    }
+
+    @Listener
+    public void onExplodeBreak(ChangeBlockEvent.Break event) {
+
+        ArenaManager arenaManager = ToB.get(ArenaManager.class);
+
+        event.getTransactions().forEach(e -> {
+
+            BlockType blockType = e.getOriginal().getState().getType();
+            Location<World> location = e.getDefault().getLocation().get();
+
+            Optional<Arena> arena = arenaManager.get(location);
+
+            if(arena.isPresent() && !(arena.get().getArenaState() == ArenaStates.MAINTENANCE)) {
+                if(!(
+                    blockType == BlockTypes.SAND ||
+                    blockType == BlockTypes.TNT
+                )) {
+                    e.setValid(false);
+                    e.getOriginal().getLocation().get().setBlock(
+                        e.getOriginal().getState(),
+                        Cause.source(Sponge.getPluginManager().getPlugin("tob").get()).build()
+                    );
+                }
+            }
 
         });
 

@@ -4,6 +4,7 @@ import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
+import de.orbit.ToB.arena.ArenaPlayer;
 import de.orbit.ToB.arena.ArenaSignEntry;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
@@ -76,6 +77,8 @@ public class SetupCommand implements Command {
                             this.put("finish", "finish");
 
                             this.put("load", "load");
+                            this.put("a", "a");
+                            this.put("b", "b");
                         }}, true),
                         GenericArguments.optional(
                             GenericArguments.integer(Text.of("id"))
@@ -87,6 +90,8 @@ public class SetupCommand implements Command {
                 )
             .build();
     }
+
+    private ArenaPlayer arenaPlayer;
 
     @Override
     public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
@@ -105,6 +110,15 @@ public class SetupCommand implements Command {
 
         //--- Handling all cases
         switch (action.toLowerCase()) {
+
+            case "a":
+                this.arenaPlayer = new ArenaPlayer(player, null);
+                this.arenaPlayer.prepare();
+                break;
+
+            case "b":
+                this.arenaPlayer.restore();
+                break;
 
             case "load":
                 arenaManager.unserialize();
@@ -441,7 +455,7 @@ public class SetupCommand implements Command {
                     return CommandResult.success();
                 }
 
-                arena.addPlate(location, teamType);
+                arena.addPlate(player.getLocation(), teamType);
 
                 messageHandler.send(
                     player,

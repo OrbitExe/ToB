@@ -5,13 +5,14 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.impl.AbstractEvent;
 
 /**
  * <p>
  *    The ArenaJoiningEvent gets called IF a player tries to join an arena, but has not been added yet to it.
  * </p>
  */
-public class ArenaJoiningEvent implements Event, Cancellable {
+public class ArenaJoiningEvent extends AbstractEvent implements Cancellable {
 
     private Cause cause;
 

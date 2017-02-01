@@ -84,15 +84,7 @@ public class SandRule implements Rule {
         //--- Count sand
         int sum = view.getBlockWorker(Cause.of(NamedCause.of("rule", this)))
                     .reduce(
-                        (volume, x, y, z, reduction) -> {
-
-                            if(volume.getBlockType(x, y, z).equals(BlockTypes.SAND)) {
-                                return reduction + 1;
-                            }
-
-                            return reduction;
-
-                        },
+                        (volume, x, y, z, reduction) -> (volume.getBlockType(x, y, z).equals(BlockTypes.SAND) ? reduction + 1 : reduction),
                         (a, b) -> (a + b),
                         0
                     );

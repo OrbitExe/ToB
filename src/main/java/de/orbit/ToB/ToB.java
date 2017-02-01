@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import de.orbit.ToB.arena.ArenaManager;
 import de.orbit.ToB.command.MainCommand;
 import de.orbit.ToB.listener.BlockListener;
+import de.orbit.ToB.listener.PickupListener;
 import de.orbit.ToB.listener.SignListener;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -91,6 +92,7 @@ public class ToB {
 
         Sponge.getEventManager().registerListeners(this, new SignListener());
         Sponge.getEventManager().registerListeners(this, new BlockListener());
+        Sponge.getEventManager().registerListeners(this, new PickupListener());
 
         //--- Commands
         MainCommand mainCommand = new MainCommand();

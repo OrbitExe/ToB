@@ -1,5 +1,6 @@
 package de.orbit.ToB.listener;
 
+import de.orbit.ToB.MessageHandler;
 import de.orbit.ToB.ToB;
 import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
@@ -17,6 +18,8 @@ import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 
 import java.util.Optional;
@@ -28,7 +31,7 @@ public class SignListener  {
      * is in the arena. The setup mechanism has a separated listener.
      */
     @Listener
-    public void onClickArenaSign(InteractBlockEvent.Secondary.MainHand event) {
+    public void onGameClassSign(InteractBlockEvent.Secondary.MainHand event) {
 
         Optional<ArenaPlayer> cause = ToB.get(ArenaManager.class).getPlayer(
             event.getCause().first(Player.class).get()
@@ -67,6 +70,63 @@ public class SignListener  {
             gameClass.apply(player);
 
         }
+
+    }
+
+    @Listener
+    public void onArenaJoin(InteractBlockEvent.Secondary.MainHand event) {
+
+        event.getCause().first(Player.class).ifPresent(player -> {
+
+            BlockState target = event.getTargetBlock().getState();
+
+            // if we got neither a WALL_SIGN or STANDING_SIGN we are not interested
+            if(!(target.getType() == BlockTypes.WALL_SIGN && target.getType() == BlockTypes.STANDING_SIGN)) {
+                return;
+            }
+
+            ArenaManager arenaManager = ToB.get(ArenaManager.class);
+            MessageHandler messageHandler = ToB.get(MessageHandler.class);
+
+            Optional<ArenaPlayer> cause = ToB.get(ArenaManager.class).getPlayer(player);
+
+            // if the player is currently in an arena
+            if(cause.isPresent()) {
+                messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "You are already in an arena. You cannot join two at once."
+                );
+                return;
+            }
+
+            TileEntity entity = event.getTargetBlock().getLocation().get().getTileEntity().get();
+            Optional<Arena> arenaOptional = arenaManager.get(
+                ArenaSignEntry.SignType.LOBBY, entity.getLocation()
+            );
+
+            if(arenaOptional.isPresent()) {
+
+                Arena arena = arenaOptional.get();
+
+                if(!(arena.add(player))) {
+                    messageHandler.send(
+                        player,
+                        MessageHandler.Level.ERROR,
+                        "You currently cannot join the arena."
+                    );
+                    return;
+                }
+
+                messageHandler.send(
+                    player,
+                    "You joined the arena! Cool!"
+                );
+            }
+
+
+        });
+
 
     }
 
