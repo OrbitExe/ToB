@@ -22,6 +22,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -637,6 +638,38 @@ public class Arena {
         int minZ = Math.min(a.getBlockZ(), b.getBlockZ());
 
         return new Location<>(a.getExtent(), minX, minY, minZ);
+    }
+
+    /**
+     * <p>
+     *    Checks if the provided arena overlaps with another arena.
+     * </p>
+     *
+     * @param arena
+     * @return
+     */
+    public boolean overlaps(Arena arena) {
+
+        if(arena.getAreaMin() == null || arena.getAreaMax() == null) {
+            return false;
+        }
+
+        Rectangle2D arenaRec = new Rectangle2D.Double(
+            this.areaMin.getX(),
+            this.areaMin.getY(),
+            (this.areaMax.getX() - this.areaMin.getX()),
+            (this.areaMax.getY() - this.areaMin.getY())
+        );
+
+        Rectangle2D compareTo = new Rectangle2D.Double(
+            arena.getAreaMin().getX(),
+            arena.getAreaMin().getY(),
+            (arena.getAreaMax().getX() - arena.getAreaMin().getX()),
+            (arena.getAreaMax().getY() - arena.getAreaMin().getY())
+        );
+
+        return (arenaRec.intersects(compareTo) || arenaRec.contains(compareTo));
+
     }
 
     /**

@@ -38,6 +38,9 @@ public class ArenaValidator {
         //--- Tower Dimension Rule
         this.rules.put(new TowerDimensionRule(), defaultContainer);
 
+        //--- Overlapping Rule
+        this.rules.put(new OverlappingRule(), defaultContainer);
+
         //--- Lobby Sign Rule
         this.rules.put(new LobbySignRule(), defaultContainer);
 

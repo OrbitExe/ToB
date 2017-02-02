@@ -112,7 +112,7 @@ public class SetupCommand implements Command {
         switch (action.toLowerCase()) {
 
             case "a":
-                arenaManager.get(0).get().createBackup();
+                arenaManager.get(0).get().createBackup(false);
                 break;
 
             case "b":
