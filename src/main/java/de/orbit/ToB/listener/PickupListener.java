@@ -22,7 +22,8 @@ public class PickupListener {
             if(arenaManager.getPlayer(player).isPresent()) {
 
                 event.getTransactions().forEach(e -> {
-                    //@TODO
+                    player.getInventory().iterator().forEachRemaining(inv -> {
+                    });
                 });
 
             }

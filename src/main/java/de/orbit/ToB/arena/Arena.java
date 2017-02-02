@@ -10,11 +10,14 @@ import de.orbit.ToB.classes.GameClasses;
 import de.orbit.ToB.events.ArenaJoiningEvent;
 import de.orbit.ToB.events.ArenaStateChangingEvent;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -47,6 +50,8 @@ public class Arena {
     private Location<World> areaMax;
 
     private Dimension towerDimension;
+
+    private List<BlockSnapshot> backup = new ArrayList<>();
 
     public Arena(int identifier) {
 
@@ -566,6 +571,51 @@ public class Arena {
     public boolean existsSign(ArenaSignEntry.SignType signType, Location<World> location) {
         return this.signs.stream().anyMatch(e -> e.getSignType() == signType && e.getSign().getLocation().getBlockPosition().equals(location.getBlockPosition()));
     }
+
+
+    /**
+     * <p>
+     *    Creates a backup of the arena.
+     * </p>
+     *
+     * @param force You can force an update.
+     *
+     * @return The amount of blocks stored.
+     */
+    public int createBackup(boolean force) {
+
+        if(!(this.backup.isEmpty()) && !(force)) {
+            throw new IllegalStateException("You cannot create a new backup while one is already exists. You have to force" +
+                    " the backup if you are sure that you wanna do it.");
+        }
+
+        for(int x = this.areaMin.getBlockX(); x < this.areaMax.getBlockX(); x++) {
+            for(int y = this.areaMin.getBlockY(); y < this.areaMax.getBlockY(); y++) {
+                for(int z = this.areaMin.getBlockZ(); z < this.areaMax.getBlockZ(); z++) {
+                    this.backup.add(this.areaMin.getExtent().createSnapshot(x, y, z).copy());
+                }
+            }
+        }
+
+        return this.backup.size();
+    }
+
+    /**
+     * <p>
+     *    Restoring it to its latest backup.
+     * </p>
+     */
+    public void restoreBackup() {
+
+        if(this.backup.isEmpty()) {
+            throw new IllegalStateException("There is no backup available");
+        }
+
+        //@TODO BlockChangeFlag.NONE might not work the best, but updating all with ALL seems to be quiet buggy - further
+        // tests required
+        this.backup.forEach(e -> e.restore(true, BlockChangeFlag.NONE));
+    }
+
 
     /**
      * <p>

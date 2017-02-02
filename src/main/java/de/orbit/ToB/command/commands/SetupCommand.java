@@ -112,12 +112,11 @@ public class SetupCommand implements Command {
         switch (action.toLowerCase()) {
 
             case "a":
-                this.arenaPlayer = new ArenaPlayer(player, null);
-                this.arenaPlayer.prepare();
+                arenaManager.get(0).get().createBackup();
                 break;
 
             case "b":
-                this.arenaPlayer.restore();
+                arenaManager.get(0).get().restoreBackup();
                 break;
 
             case "load":
