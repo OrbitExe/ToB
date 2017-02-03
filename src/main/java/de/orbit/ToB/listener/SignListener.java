@@ -74,14 +74,14 @@ public class SignListener  {
     }
 
     @Listener
-    public void onArenaJoin(InteractBlockEvent.Secondary.MainHand event) {
+    public void onArenaJoin(InteractBlockEvent event) {
 
         event.getCause().first(Player.class).ifPresent(player -> {
 
             BlockState target = event.getTargetBlock().getState();
 
             // if we got neither a WALL_SIGN or STANDING_SIGN we are not interested
-            if(!(target.getType() == BlockTypes.WALL_SIGN && target.getType() == BlockTypes.STANDING_SIGN)) {
+            if(!(target.getType() == BlockTypes.WALL_SIGN) && !(target.getType() == BlockTypes.STANDING_SIGN)) {
                 return;
             }
 
@@ -93,9 +93,9 @@ public class SignListener  {
             // if the player is currently in an arena
             if(cause.isPresent()) {
                 messageHandler.send(
-                        player,
-                        MessageHandler.Level.ERROR,
-                        "You are already in an arena. You cannot join two at once."
+                    player,
+                    MessageHandler.Level.ERROR,
+                    "You are already in an arena. You cannot join two at once."
                 );
                 return;
             }
@@ -123,7 +123,6 @@ public class SignListener  {
                     "You joined the arena! Cool!"
                 );
             }
-
 
         });
 

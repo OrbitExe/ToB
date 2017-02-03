@@ -1,18 +1,21 @@
 package de.orbit.ToB.arena;
 
+import de.orbit.ToB.arena.team.TeamType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.Player;
 
 public class ArenaPlayer {
 
-    private final Arena arena;
     private final Player player;
+    private final Arena arena;
+    private final TeamType teamType;
 
     private final DataContainer backup;
 
-    public ArenaPlayer(Player player, Arena arena) {
+    public ArenaPlayer(Player player, Arena arena, TeamType teamType) {
         this.player = player;
         this.arena = arena;
+        this.teamType = teamType;
 
         this.backup = this.player.toContainer().copy();
     }
@@ -24,6 +27,15 @@ public class ArenaPlayer {
      */
     public Player getPlayer() {
         return this.player;
+    }
+
+    /**
+     * The team the player belongs to.
+     *
+     * @return
+     */
+    public TeamType getTeamType() {
+        return this.teamType;
     }
 
     /**

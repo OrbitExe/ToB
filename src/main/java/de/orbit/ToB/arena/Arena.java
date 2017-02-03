@@ -268,6 +268,18 @@ public class Arena {
 
     /**
      * <p>
+     *     Returns all players belonging to the provided team.
+     * </p>
+     *
+     * @param teamType
+     * @return
+     */
+    public List<ArenaPlayer> getTeam(TeamType teamType) {
+        return this.players.stream().filter(e -> e.getTeamType() == teamType).collect(Collectors.toList());
+    }
+
+    /**
+     * <p>
      *    Adds a new player to the arena if possible. This can be cancelled by listing to the {@link ArenaJoiningEvent}
      *    and cancelling it if necessary.
      * </p>
@@ -295,7 +307,7 @@ public class Arena {
         }
 
         //--- Add and store (prepare) the player
-        ArenaPlayer arenaPlayer = new ArenaPlayer(player, this);
+        ArenaPlayer arenaPlayer = new ArenaPlayer(player, this, TeamTypes.BLUE);
         this.players.add(arenaPlayer);
         arenaPlayer.prepare();
 

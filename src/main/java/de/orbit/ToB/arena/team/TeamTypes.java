@@ -17,6 +17,11 @@ public enum TeamTypes implements TeamType {
         public TextColor color() {
             return TextColors.RED;
         }
+
+        @Override
+        public TeamType opposite() {
+            return TeamTypes.BLUE;
+        }
     },
     BLUE {
         @Override
@@ -27,6 +32,11 @@ public enum TeamTypes implements TeamType {
         @Override
         public TextColor color() {
             return TextColors.AQUA;
+        }
+
+        @Override
+        public TeamType opposite() {
+            return TeamTypes.RED;
         }
     };
 

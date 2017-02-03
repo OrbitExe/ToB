@@ -6,7 +6,6 @@ import de.orbit.ToB.arena.Arena;
 import de.orbit.ToB.arena.ArenaManager;
 import de.orbit.ToB.arena.states.ArenaStates;
 import de.orbit.ToB.arena.team.TeamTypes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -14,7 +13,6 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -162,10 +160,6 @@ public class BlockListener {
                     blockType == BlockTypes.TNT
                 )) {
                     e.setValid(false);
-                    e.getOriginal().getLocation().get().setBlock(
-                        e.getOriginal().getState(),
-                        Cause.source(Sponge.getPluginManager().getPlugin("tob").get()).build()
-                    );
                 }
             }
 

@@ -18,4 +18,11 @@ public interface TeamType {
      */
     TextColor color();
 
+    /**
+     * The opposite team.
+     *
+     * @return
+     */
+    TeamType opposite();
+
 }
