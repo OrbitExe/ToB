@@ -95,7 +95,7 @@ public class SignListener  {
                 messageHandler.send(
                     player,
                     MessageHandler.Level.ERROR,
-                    "You are already in an arena. You cannot join two at once."
+                    "You are already in an arena."
                 );
                 return;
             }

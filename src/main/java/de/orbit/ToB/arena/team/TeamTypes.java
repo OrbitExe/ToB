@@ -2,6 +2,7 @@ package de.orbit.ToB.arena.team;
 
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.Color;
 
 import java.util.Optional;
 
@@ -22,6 +23,11 @@ public enum TeamTypes implements TeamType {
         public TeamType opposite() {
             return TeamTypes.BLUE;
         }
+
+        @Override
+        public Color transformColor() {
+            return Color.RED;
+        }
     },
     BLUE {
         @Override
@@ -37,6 +43,11 @@ public enum TeamTypes implements TeamType {
         @Override
         public TeamType opposite() {
             return TeamTypes.RED;
+        }
+
+        @Override
+        public Color transformColor() {
+            return Color.BLUE;
         }
     };
 

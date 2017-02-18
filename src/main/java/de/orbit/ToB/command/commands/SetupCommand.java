@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 
 public class SetupCommand implements Command {
 
-    private final static Pattern PATTENR_TOWER_DIMENSION = Pattern.compile("^([0-9]+)(x)([0-9]+)$");
+    private final static Pattern PATTERN_TOWER_DIMENSION = Pattern.compile("^([0-9]+)(x)([0-9]+)$");
 
     public SetupCommand() {}
 
@@ -91,7 +91,6 @@ public class SetupCommand implements Command {
             .build();
     }
 
-    private ArenaPlayer arenaPlayer;
 
     @Override
     public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
@@ -106,6 +105,7 @@ public class SetupCommand implements Command {
 
         Optional<Arena> arenaOptional = id.isPresent() ? arenaManager.get(id.get()) : Optional.empty();
 
+        //@TODO Check that we actually have a player here
         Player player = (Player) commandSource;
 
         //--- Handling all cases
@@ -139,6 +139,7 @@ public class SetupCommand implements Command {
                         player,
                         MessageHandler.Level.SUCCESS,
                         "Successfully created the arena with the id %d.",
+                        true,
                         recommendedId
                     );
                 }
@@ -633,7 +634,7 @@ public class SetupCommand implements Command {
                 Matcher matcher;
                 if(
                     !(value.isPresent()) ||
-                    !((matcher = SetupCommand.PATTENR_TOWER_DIMENSION.matcher(value.get())).matches())
+                    !((matcher = SetupCommand.PATTERN_TOWER_DIMENSION.matcher(value.get())).matches())
                 ) {
                     messageHandler.send(
                         player,

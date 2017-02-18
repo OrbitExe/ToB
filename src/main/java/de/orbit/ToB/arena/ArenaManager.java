@@ -6,7 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import de.orbit.ToB.Component;
 import de.orbit.ToB.ToB;
-import de.orbit.ToB.arena.states.ArenaState;
 import de.orbit.ToB.arena.states.ArenaStates;
 import de.orbit.ToB.arena.team.TeamType;
 import de.orbit.ToB.arena.team.TeamTypes;
@@ -16,6 +15,7 @@ import de.orbit.ToB.classes.GameClasses;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -153,6 +153,7 @@ public class ArenaManager implements Component {
 
     public void unserialize() {
 
+        //@TODO Feeding real data.
         String data = "[{\"identifier\":0,\"maxPlayers\":8,\"bounds\":{\"min\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-315.0,\"y\":55.0,\"z\":-125.0},\"max\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-75.0,\"y\":152.0,\"z\":58.0}},\"towerDimensions\":{\"width\":7.0,\"height\":7.0},\"points\":{\"lobbyPoint\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-185.33558886065958,\"y\":49.0,\"z\":126.84309117653561},\"redPoint\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-84.68050618728505,\"y\":62.0,\"z\":-50.438439188859356},\"bluePoint\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-313.6993395662244,\"y\":62.0,\"z\":-3.001024304757779}},\"buttons\":{\"redButton\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-93.0,\"y\":134.0,\"z\":-18.0},\"blueButton\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-306.0,\"y\":134.0,\"z\":-36.0}},\"signs\":[{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-86.0,\"y\":62.0,\"z\":-53.0},\"signType\":\"CLASS\",\"teamType\":\"Red\",\"content\":\"Runner\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-86.0,\"y\":63.0,\"z\":-53.0},\"signType\":\"CLASS\",\"teamType\":\"Red\",\"content\":\"Mercenary\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-85.0,\"y\":63.0,\"z\":-53.0},\"signType\":\"CLASS\",\"teamType\":\"Red\",\"content\":\"Spy\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-84.0,\"y\":63.0,\"z\":-53.0},\"signType\":\"CLASS\",\"teamType\":\"Red\",\"content\":\"Builder\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-84.0,\"y\":62.0,\"z\":-53.0},\"signType\":\"CLASS\",\"teamType\":\"Red\",\"content\":\"Saboteur\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-313.0,\"y\":62.0,\"z\":-1.0},\"signType\":\"CLASS\",\"teamType\":\"Blue\",\"content\":\"Saboteur\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-313.0,\"y\":63.0,\"z\":-1.0},\"signType\":\"CLASS\",\"teamType\":\"Blue\",\"content\":\"Runner\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-314.0,\"y\":63.0,\"z\":-1.0},\"signType\":\"CLASS\",\"teamType\":\"Blue\",\"content\":\"Spy\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-315.0,\"y\":63.0,\"z\":-1.0},\"signType\":\"CLASS\",\"teamType\":\"Blue\",\"content\":\"Builder\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-315.0,\"y\":62.0,\"z\":-1.0},\"signType\":\"CLASS\",\"teamType\":\"Blue\",\"content\":\"Mercenary\"},{\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-186.0,\"y\":50.0,\"z\":123.0},\"signType\":\"LOBBY\",\"teamType\":\"null\",\"content\":\"null\"}],\"plates\":[{\"team\":\"Red\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-100.70386523936165,\"y\":133.0,\"z\":-12.81992671905358}},{\"team\":\"Red\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-106.6768248198569,\"y\":133.0,\"z\":-12.274231253302315}},{\"team\":\"Red\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-106.57634599111928,\"y\":133.0,\"z\":-22.41181042994986}},{\"team\":\"Blue\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-291.3160560355865,\"y\":133.0,\"z\":-40.5677894558693}},{\"team\":\"Blue\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-297.51263319234465,\"y\":133.0,\"z\":-40.416034755159565}},{\"team\":\"Blue\",\"location\":{\"identifier\":\"d5b288e6-d2e3-4130-9916-634c8d0d1f79\",\"x\":-291.629388431396,\"y\":133.0,\"z\":-30.40011662824807}}]}]";
 
         Gson gson = new Gson();
@@ -175,12 +176,14 @@ public class ArenaManager implements Component {
             arena.setBoundaries(min, max);
 
             //--- Sometimes we have some unloaded chunks. We should load them before we try to go any further.
-            World world = min.getExtent();
-            for(int x = min.getChunkPosition().getX(); x <= max.getChunkPosition().getX(); x += 16) {
-                for (int z = min.getChunkPosition().getZ(); z <= max.getChunkPosition().getZ(); z += 16) {
-                    world.loadChunk(new Vector3i(x, 0, z), false);
-                }
-            }
+            //@TODO For some reason if we pre-load the chunks at this point this doesn't help, we have to load them exactly
+            // when we are checking for the entity (e.g.: sign). - 18.2.2017
+            //World world = min.getExtent();
+            //for(int x = min.getChunkPosition().getX(); x <= max.getChunkPosition().getX(); x += 16) {
+            //    for (int z = min.getChunkPosition().getZ(); z <= max.getChunkPosition().getZ(); z += 16) {
+            //        world.loadChunk(new Vector3i(x, 0, z), false);
+            //    }
+            //}
 
             //--- Tower Dimensions
             JsonObject towerDimensions = object.getAsJsonObject("towerDimensions");
@@ -228,6 +231,8 @@ public class ArenaManager implements Component {
                     content = GameClasses.toClass(sign.get("content").getAsString()).get();
                 }
 
+                //--- Pre-loading the chunk
+                location.getExtent().loadChunk(location.getChunkPosition(), false);
                 if(location.getTileEntity().isPresent() && location.getTileEntity().get() instanceof Sign) {
                     arena.addSign(signType, teamType, (Sign) location.getTileEntity().get(), content);
                 }
@@ -253,7 +258,7 @@ public class ArenaManager implements Component {
 
             //if(validator.isValid()) {
                 this.add(arena);
-                arena.setArenaState(ArenaStates.WAITING);
+                arena.changeState(ArenaStates.WAITING);
                 ToB.getLogger().info(String.format(
                     "Successfully loaded and validated arena %d.",
                         arena.getIdentifier()

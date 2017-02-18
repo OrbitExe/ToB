@@ -1,6 +1,7 @@
 package de.orbit.ToB.arena.team;
 
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.util.Color;
 
 public interface TeamType {
 
@@ -24,5 +25,13 @@ public interface TeamType {
      * @return
      */
     TeamType opposite();
+
+    /**
+     *
+     * Gives the {@link TextColor} related {@link Color}.
+     *
+     * @return
+     */
+    Color transformColor();
 
 }

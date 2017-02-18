@@ -8,7 +8,7 @@ public class ArenaPlayer {
 
     private final Player player;
     private final Arena arena;
-    private final TeamType teamType;
+    private TeamType teamType;
 
     private final DataContainer backup;
 
@@ -45,6 +45,17 @@ public class ArenaPlayer {
      */
     public Arena getArena() {
         return this.arena;
+    }
+
+    /**
+     * <p>
+     *    Set the team of the player.
+     * </p>
+     *
+     * @param teamType
+     */
+    public void setTeamType(TeamType teamType) {
+       this.teamType = teamType;
     }
 
     /**

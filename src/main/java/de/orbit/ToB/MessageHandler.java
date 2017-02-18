@@ -55,7 +55,7 @@ public class MessageHandler implements Component {
     }
 
     public void send(Player player, Level level, String text) {
-        this.send(player, level, text, new Object[]{});
+        this.send(player, level, text, false, new Object[]{});
     }
 
     public void send(Player player, String text) {
